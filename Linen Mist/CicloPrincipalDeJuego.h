@@ -1,4 +1,5 @@
-#include <string>
+#include "string"
+#include "vector"
 
 using namespace std;
 
@@ -7,5 +8,5 @@ class CicloDeJuego {
   public:
 	void iniciar();
   private:
-	void separarPalabras(string);
+	vector<string> separarPalabras(const string &, vector<string> &);
 };
