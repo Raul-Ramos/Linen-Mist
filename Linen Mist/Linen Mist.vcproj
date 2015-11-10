@@ -209,6 +209,22 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Entidad.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Habitacion.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Objeto.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ObjetoCerrable.h"
+				>
+			</File>
+			<File
 				RelativePath=".\stdafx.h"
 				>
 			</File>
