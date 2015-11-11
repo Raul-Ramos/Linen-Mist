@@ -3,16 +3,18 @@
 #include "stdafx.h"
 
 #include "iostream"
-#include "string"
 #include "sstream"
-#include "vector"
 
 #include "CicloPrincipalDeJuego.h"
+#include "Nivel.h"
 
 using namespace std;
 
 void CicloDeJuego::iniciar()
 {
+	//Genera el mundo
+	Nivel* nivel = new Nivel();
+
 	//Comando de entrada
 	string comando;
 	//Vector conteniendo el comando separado por espacios

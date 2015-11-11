@@ -7,6 +7,15 @@
 
 using namespace std;
 
+//Tipo de habitación.
+//Las habitaciones de niebla cambian cuando se entra en ellas
+//para que todas las salidas sean la habitación por donde se ha entrado
+enum TipoHabitacion
+{
+	NORMAL,
+	NIEBLA
+};
+
 enum OrientacionSalida
 {
 	NORTE,
@@ -29,7 +38,8 @@ enum OrientacionSalida
 class Habitacion : public Entidad
 {
 public:
-	Habitacion(const char* nombre, const char* descripcion);
+	//Habitacion(const char* nombre, const char* descripcion);
+	Habitacion(const char* nombre, const char* descripcion, const TipoHabitacion tipoHab = NORMAL);
 
 	vector<Habitacion*> get_salidas() const;
 	void set_salidas(const vector<Habitacion*> salidas);
@@ -37,6 +47,7 @@ public:
 	void set_fase(const int fase);
 
 private :
+	TipoHabitacion tipoHabitacion;
 	vector<Habitacion*> salidas;
 	int fase;
 };

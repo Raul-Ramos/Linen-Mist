@@ -10,18 +10,20 @@
 //se pasa a 1. Al visitarla en fase 1, la descripción se reduce singificativamente.
 //Valores superiores a 1 se utilizan para representar diferentes eventos narrativos
 //posteriores según se necesite.
-Habitacion::Habitacion(const char* nombre, const char* descripcion) :
-Entidad(nombre, descripcion)
+Habitacion::Habitacion(const char* nombre, const char* descripcion, const TipoHabitacion tipoHab) :
+Entidad(nombre, descripcion), tipoHabitacion(tipoHab)
 {
 	tipo = HABITACION;
 	fase = 0; //TODO: Declaracion en header?
 
+	/*
 	salidas[NORTE] = NULL;
 	salidas[SUR] = NULL;
 	salidas[ESTE] = NULL;
 	salidas[OESTE] = NULL;
 	salidas[ARRIBA] = NULL;
 	salidas[ABAJO] = NULL;
+	*/
 }
 
 //Gets/Sets
