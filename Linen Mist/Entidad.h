@@ -1,33 +1,35 @@
 #ifndef __Entidad__
 #define __Entidad__
 
+#include <string>
+
 using namespace std;
 
 //Enum sobre los distintos tipos de entidad
 enum TipoDeEntidad
 {
-	UNDEFINDED,
+	UNDEFINED,
 	ITEM,
 	HABITACION
 };
 
 //Entidad. Existencia material dentro del juego, con un nombre
-// y una descripcion y que se puede examinar.
+// y una descripcion y capaz de ser examinada.
 class Entidad
 {
 public:
 	Entidad(const char* nombre, const char* descripcion);
-	virtual ~Entidad();
+	//virtual ~Entidad();
 
-	virtual void get_nombre() const;
-	virtual void set_nombre(const char* nombre);	
-	virtual void get_descripcion() const;
-	virtual void set_descripcion(const char* descripcion);
+	string get_nombre() const;
+	void set_nombre(const string nombre);	
+	string get_descripcion() const;
+	void set_descripcion(const string descripcion);
 
 protected :
 	TipoDeEntidad tipo;
 	string nombre;
-	string description;
+	string descripcion;
 };
 
 #endif //__Entidad__

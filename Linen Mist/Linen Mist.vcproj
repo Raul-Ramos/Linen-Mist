@@ -175,7 +175,19 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Entidad.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Habitacion.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Linen Mist.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Objeto.cpp"
 				>
 			</File>
 			<File

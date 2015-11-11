@@ -1,6 +1,10 @@
 #ifndef __Habitacion__
 #define __Habitacion__
 
+#include <string>
+#include <vector>
+#include "Entidad.h"
+
 using namespace std;
 
 enum OrientacionSalida
@@ -27,13 +31,13 @@ class Habitacion : public Entidad
 public:
 	Habitacion(const char* nombre, const char* descripcion);
 
-	void get_salidas() const;
-	void set_salidas(const vector<Habitacion>* salidas);
-	void get_fase() const;
+	vector<Habitacion*> get_salidas() const;
+	void set_salidas(const vector<Habitacion*> salidas);
+	int get_fase() const;
 	void set_fase(const int fase);
 
 private :
-	vector<Habitacion> salidas;
+	vector<Habitacion*> salidas;
 	int fase;
 };
 

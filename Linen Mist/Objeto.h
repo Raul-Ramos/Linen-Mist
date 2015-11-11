@@ -1,6 +1,9 @@
 #ifndef __Objeto__
 #define __Objeto__
 
+#include <string>
+#include "Entidad.h"
+
 using namespace std;
 
 //Objeto. Una entidad contenida por otra que es capaz de ser
@@ -8,10 +11,10 @@ using namespace std;
 class Objeto : public Entidad
 {
 public:
-	Objeto(const char* nombre, const char* descripcion, const Entidad* padre);
+	Objeto(const char* nombre, const char* descripcion, Entidad* padre);
 
-	void get_padre() const;
-	void set_padre(const Entidad* padre);	
+	Entidad* get_padre() const;
+	void set_padre(Entidad* padre);	
 
 protected :
 	Entidad* padre;
