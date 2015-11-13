@@ -6,8 +6,21 @@
 
 using namespace std;
 
+enum tipoObjeto
+{
+	NORMAL,
+	CARNE,
+	VENENO,
+	LLAVE,
+	CUCHILLO,
+	TENAZAS,
+	TELEFONO,
+	DINERO
+};
+
 //Objeto. Una entidad contenida por otra que es capaz de ser
 //recogida, almacenada, dejada...
+//Un padre null indica que está en el inventario
 class Objeto : public Entidad
 {
 public:

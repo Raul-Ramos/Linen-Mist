@@ -4,6 +4,7 @@
 
 #include "stdafx.h"
 #include <iostream>
+#include <algorithm>
 
 #include "Nivel.h"
 #include "Habitacion.h"
@@ -48,12 +49,100 @@ Nivel::Nivel(){
 	recibidor->AsignarEnlace(ARRIBA, rellano, true);
 	rellano->AsignarEnlace(OESTE, estudio, true);
 
+	//Objetos.
+
+
+	//Puntero que indica dónde está el personaje
+	visitando = frontal;
+
 }
 
-void Nivel::operacion(const vector<string> operacion) const {
+void Nivel::operacion(const vector<string> operacion) {
 
-	if ( operacion.size() > 0) {
-		cout << "Quieres " << operacion.at(0);
+	//Se asegura de que se ha escrito algo
+	if ( operacion.size() < 1) {
+		cout << "Excuse me?";
+	} else {
+		//Opera según el nombre de palabras
+		switch (operacion.size()) {
+			case 4:
+				/*
+				if (operacion.at(0).compare("LOOK") == 0){
+					cout << "I see";
+				}
+				else {cout << "I can't do that.";}
+				break;
+				*/
+
+			case 3:
+				/*
+				if (operacion.at(0).compare("LOOK") == 0){
+					cout << "I see";
+				}
+				else {cout << "I can't do that.";}
+				break;
+				*/
+
+			case 2:
+				//Funcion GO
+				if (operacion.at(0).compare("GO") == 0){
+					this->go(operacion.at(1));
+				} // Comando no entendido
+				else {cout << "I can't do that.";}
+				break;
+
+			case 1:
+				/*
+				if (operacion.at(0).compare("LOOK") == 0){
+					cout << "I see";
+				}
+				else {cout << "I can't do that";}
+				break;
+				*/
+
+			default:
+				cout << "Only commands up to four words are accepted.";
+				break;
+		}
+	}
+}
+
+//Funcion para ir de una habitacion a otra
+void Nivel::go(const string destinoDeseado){
+
+	//Comprueba qué dirección se ha escrito
+	OrientacionSalida destino = NINGUNA;
+
+	if (destinoDeseado.compare("NORTH") == 0){ destino = NORTE;
+	} else if (destinoDeseado.compare("SOUTH") == 0){ destino = SUR;
+	} else if (destinoDeseado.compare("EAST") == 0){ destino = ESTE;
+	} else if (destinoDeseado.compare("WEST") == 0){ destino = OESTE;
+	} else if (destinoDeseado.compare("UPSTAIRS") == 0){ destino = ARRIBA;
+	} else if (destinoDeseado.compare("DOWNSTAIRS") == 0){ destino = ABAJO;
 	}
 
+	//Si se ha escrito una direccion valida
+	if(destino != NINGUNA){
+
+		//Si se puede ir donde se quiere
+		Habitacion* visitar = visitando->get_salidas().at(destino);
+		if (visitar != NULL){
+
+			//Si no ha sido visitado nunca antes (fase 0), se
+			//da la descripción larga y se pasa a fase 1.
+			if( visitar->get_fase() == 0 ){
+				visitar->set_fase(1);
+				cout << visitar->get_descripcion();
+			} else { //Si no, simplemente se dice que se ha regresado.
+				cout << "You return to the " << visitar->get_nombre() << ".";
+			}
+			//Se cambia la habitacion que estamos visitando actualmente.
+			visitando = visitar;
+
+		} else { // Direccion no valida
+			cout << "I can't go " << destinoDeseado << " from here.";
+		}
+	} else { // Direccion inexistente
+		cout << "I can only go North, South, West, East, Upstairs and Downstairs.";
+	}
 }

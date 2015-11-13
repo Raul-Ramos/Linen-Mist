@@ -4,6 +4,7 @@
 #include <vector>
 #include <string>
 #include "Entidad.h"
+#include "Habitacion.h"
 
 using namespace std;
 
@@ -15,10 +16,15 @@ class Nivel
 public:
 	Nivel();
 
-	void operacion(const vector<string> operacion) const; //Todo: ¿Pasar como puntero?
+	void operacion(const vector<string> operacion); //Todo: ¿Pasar como puntero?
 
 private :
+	//Lista de entidades
 	vector<Entidad> entidades;
+	//Puntero que indica que habitación se está visitando
+	Habitacion* visitando;
+
+	void go(const string destinoDeseado);
 };
 
 #endif //__Nivel__

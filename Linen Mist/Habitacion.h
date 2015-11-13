@@ -18,7 +18,8 @@ enum TipoHabitacion
 
 enum OrientacionSalida
 {
-	NORTE = 0,
+	NINGUNA = -1,
+	NORTE,
 	SUR,
 	ESTE,
 	OESTE,

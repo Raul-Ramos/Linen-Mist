@@ -47,6 +47,11 @@ vector<string> CicloDeJuego::separarPalabras(const string &comando, vector<strin
 	//Se van leyendo palabras usando como separador un espacio
 	//y se guardan en el vector con push_back
     while (getline(ss, palabra, ' ')) {
+
+		//Pasa la palabra a mayusculas
+		transform(palabra.begin(), palabra.end(), palabra.begin(), ::toupper);
+
+		//Almacena la palabra en el voctor Elementos
         elementos.push_back(palabra);
     }
 
