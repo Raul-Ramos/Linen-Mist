@@ -12,6 +12,8 @@ using namespace std;
 
 void CicloDeJuego::iniciar()
 {
+	cout << "Welcome to the Linen Mist";
+
 	//Genera el mundo
 	Nivel* nivel = new Nivel();
 
@@ -25,12 +27,13 @@ void CicloDeJuego::iniciar()
 	{
 		//Introducción del nuevo comando
         comando.clear();
-        cout << "> ";
+        cout << "\n\n> ";
         getline(cin, comando);
 
 		//Separación de palabras del comando
 		instrucciones.clear();
 		separarPalabras(comando, instrucciones);
+		nivel->operacion(instrucciones);
 	}
 }
 

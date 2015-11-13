@@ -15,7 +15,7 @@ class Nivel
 public:
 	Nivel();
 
-	void operacion(const vector<string>) const; //Todo: ¿Pasar como puntero?
+	void operacion(const vector<string> operacion) const; //Todo: ¿Pasar como puntero?
 
 private :
 	vector<Entidad> entidades;

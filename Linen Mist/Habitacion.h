@@ -18,7 +18,7 @@ enum TipoHabitacion
 
 enum OrientacionSalida
 {
-	NORTE,
+	NORTE = 0,
 	SUR,
 	ESTE,
 	OESTE,
@@ -40,9 +40,11 @@ class Habitacion : public Entidad
 public:
 	//Habitacion(const char* nombre, const char* descripcion);
 	Habitacion(const char* nombre, const char* descripcion, const TipoHabitacion tipoHab = NORMAL);
+	
+	//Asigna una habitacion como vecino
+	void AsignarEnlace(const OrientacionSalida direccion, Habitacion* vecino, const bool bidireccional);
 
 	vector<Habitacion*> get_salidas() const;
-	void set_salidas(const vector<Habitacion*> salidas);
 	int get_fase() const;
 	void set_fase(const int fase);
 
