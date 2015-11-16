@@ -60,9 +60,9 @@ Nivel::Nivel(){
 	niebla->AsignarEnlace(OESTE,frontal,false);
 
 	//Contenedores
-	Objeto* joyero = new Objeto("box", "descr", casaDelArbol);
+	Objeto* joyero = new Objeto("box", "descr", casaDelArbol, CONTENEDOR);
 	entidades.emplace_back(joyero);
-	Objeto* cajaHerramientas = new Objeto("toolbox", "descr", garage);
+	Objeto* cajaHerramientas = new Objeto("toolbox", "descr", garage, CONTENEDOR);
 	entidades.emplace_back(cajaHerramientas);
 
 	//Objetos.
@@ -91,13 +91,13 @@ void Nivel::operacion(const vector<string> operacion) {
 		//Opera según el nombre de palabras
 		switch (operacion.size()) {
 			case 4:
-				/*
-				if (operacion.at(0).compare("LOOK") == 0){
-					cout << "I see";
-				}
+				//Funcion PUT X IN Y
+				if (operacion.at(0).compare("put") == 0
+					&& operacion.at(2).compare("in") == 0){
+					this->drop(operacion.at(1), operacion.at(3));
+				} // Comando no entendido
 				else {cout << "I can't do that.";}
 				break;
-				*/
 
 			case 3:
 				/*
@@ -109,13 +109,17 @@ void Nivel::operacion(const vector<string> operacion) {
 				*/
 
 			case 2:
-				//Funcion GO
+				//Funcion GO X
 				if (operacion.at(0).compare("go") == 0){
 					this->go(operacion.at(1));
-				} else if (operacion.at(0).compare("take") == 0){
+				} //Funcion TAKE X
+				else if (operacion.at(0).compare("take") == 0){
 					this->take(operacion.at(1));
+				} //Funcion DROP X
+				else if (operacion.at(0).compare("drop") == 0) {
+					this->drop(operacion.at(1));
 				} // Comando no entendido
-				else {cout << "I can't do that.";}
+				else {cout << "You can't do that.";}
 				break;
 
 			case 1:
@@ -134,9 +138,146 @@ void Nivel::operacion(const vector<string> operacion) {
 	}
 }
 
-//Funcion para tomar un objeto
+//Busca una entidad en la lista de entidades, la devuelve si le encuentra
+//y si no devuelve null
+Entidad * Nivel::buscarEntidad(const string entidadDeseada)
+{
+	//Busca una entidad cuyo nombre coincida con el deseado
+	for (int i = 0; i < entidades.size(); i++){
+
+		//Si el objeto es el que estamos buscando...
+		if (entidades.at(i).get()->get_nombre().compare(entidadDeseada) == 0) {
+
+			return entidades.at(i).get();
+		}
+	}
+
+	return NULL;
+}
+
+//Funcion para tomar un objeto de la habitación actual
 void Nivel::take(const string objetoDeseado){
 
+	//Se busca el objeto deseado
+	Entidad* puntero = buscarEntidad(objetoDeseado);
+
+	//Si se ha encontrado el objeto
+	if (puntero != NULL) {
+
+		//Si es un objeto
+		if (puntero->get_tipoEntidad() == ITEM) {
+
+			//Objeto se registra en una nueva variable
+			//La variable de puntero ahora se utilizará para buscar
+			//el último contenedor no contenido
+			Entidad* objeto = static_cast<Objeto*>(puntero);
+			puntero = objeto;
+
+			//Busca la última entidad no contenida
+			while (puntero->get_padre() != NULL) {
+				puntero = puntero->get_padre();
+			}
+
+			//Si esta entidad es la habitacion actual, el objeto se puede tomar
+			if (puntero == visitando) {
+
+				//El padre del objeto indica a "NULL" (lo que quiere decir
+				//que está en el inventario) y se avisa al usuario;
+				objeto->set_padre(NULL);
+				cout << "You took " << objeto->get_nombre() << ".";
+
+			}
+			else { //Si el objeto existe pero no es accesible, disimulamos
+				cout << "You can't take that.";
+			}
+		}
+		else { //Si no es un objeto
+			cout << "You can't take that.";
+		}
+	} //Si no se ha encontrado el objeto
+	else {
+		cout << "You can't take that.";
+	}
+}
+
+//Funcion para dejar un objeto en una habitacion u objeto capaz de contener
+//otros objetos
+void Nivel::drop(const string objetoDeseado, const string contenedorDeseado) {
+
+	//Se busca el objeto deseado
+	Entidad* contenido = buscarEntidad(objetoDeseado);
+
+	//Si se ha encontrado el objeto
+	if (contenido != NULL) {
+
+		//Si el objeto está realmente en el inventorio
+		if (contenido->get_padre() == NULL) {
+
+			//Si contenedor está en null significa que se quiere dejar en la
+			//habitación actual
+			if (contenedorDeseado == "") {
+
+				contenido->set_padre(visitando);
+				cout << "You dropped " << contenido->get_nombre() << " to the ground.";
+
+			} //Si el contenedor no es null, significa que se quiere dejar
+			//dentro de otro contenedor
+			else {
+
+				//Buscamos el contenedor deseado
+				Entidad* contenedor = buscarEntidad(contenedorDeseado);
+
+				//Si se ha encontrado el contenedor
+				if (contenedor != NULL) {
+
+					//Busca la última entidad no contenida
+					Entidad* puntero = contenedor;
+					while (puntero->get_padre() != NULL) {
+						puntero = puntero->get_padre();
+					}
+
+					//Si el contenedor está en la habitacion o en el inventario
+					if (puntero == visitando || puntero == contenido) {
+
+						//Si el contenedor es un item
+						if (contenedor->get_tipoEntidad() == ITEM) {
+
+							//Se hace cast para acceder a propiedades de Objetos
+							Objeto* contenedorObj = static_cast<Objeto*>(contenedor);
+
+							//Si es un objeto de tipo contenedor
+							if (contenedorObj->get_tipoObjeto() == CONTENEDOR){
+
+								//Asignamos el contenedor como padre del objeto contenido
+								//y avisamos al usuario
+								contenido->set_padre(contenedor);
+								cout << "You put " << contenido->get_nombre() << " inside " << contenedor->get_nombre() << ".";
+
+							} //Si no es un objeto de tipo contenedor
+							else {
+								cout << "You can't put objects in " << contenedorObj->get_nombre() << ".";
+							}
+						} //Si el contenedor no es un item
+						else {
+							cout << "You can't do that.";
+						}
+					} //Si el contenedor no es accesible
+					else {
+						cout << "You can't do that.";
+					}
+				} //Si no se ha encontrado el contenedor
+				else {
+					cout << "You don't have any object with that name.";
+				}
+			}
+		} //Si el objeto no está en el inventorio
+		else {
+			cout << "You don't have any object with that name.";
+		}
+	} //Si no se ha encontrado el objeto
+	else {
+		cout << "You don't have any object with that name.";
+	}
 }
 
 //Funcion para ir de una habitacion a otra

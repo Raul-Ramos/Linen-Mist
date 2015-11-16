@@ -40,7 +40,7 @@ class Habitacion : public Entidad
 {
 public:
 	//Habitacion(const char* nombre, const char* descripcion);
-	Habitacion(const char* nombre, const char* descripcion, const TipoHabitacion tipoHab = NORMAL);
+	Habitacion(const char* nombre, const char* descripcion, const TipoHabitacion tipoHab = NORMAL, Entidad* padre = NULL);
 	
 	//Asigna una habitacion como vecino
 	void AsignarEnlace(const OrientacionSalida direccion, Habitacion* vecino, const bool bidireccional);

@@ -27,7 +27,9 @@ private :
 	//Puntero que indica que habitación se está visitando
 	Habitacion* visitando;
 
+	Entidad* buscarEntidad(const string entidadDeseada);
 	void take(const string objetoDeseado);
+	void drop(const string objetoDeseado, const string contenedorDeseado = "");
 	void go(const string destinoDeseado);
 };
 

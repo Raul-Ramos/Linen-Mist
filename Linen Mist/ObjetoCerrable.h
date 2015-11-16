@@ -17,7 +17,7 @@ enum TipoCerrable
 class ObjetoCerrable : public Objeto
 {
 public:
-	ObjetoCerrable(const char* nombre, const char* descripcion, const Entidad* padre, const TipoCerrable tipoCerrable, const bool cerrado, const bool bloqueado);
+	ObjetoCerrable(const char* nombre, const char* descripcion, Entidad* padre, const TipoCerrable tipoCerrable, const bool cerrado, const bool bloqueado);
 
 	void get_cerrado() const;
 	void set_cerrado(const bool cerrado);

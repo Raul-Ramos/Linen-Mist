@@ -15,7 +15,8 @@ enum TipoObjeto
 	CUCHILLO,
 	TENAZAS,
 	TELEFONO,
-	DINERO
+	DINERO,
+	CONTENEDOR
 };
 
 //Objeto. Una entidad contenida por otra que es capaz de ser
@@ -24,17 +25,13 @@ enum TipoObjeto
 class Objeto : public Entidad
 {
 public:
-	Objeto(const char* nombre, const char* descripcion, Entidad* padre, TipoObjeto tipoObjeto = GENERICO);
+	Objeto(const char* nombre, const char* descripcion, Entidad* padre, const TipoObjeto tipoObjeto = GENERICO);
 
-	Entidad* get_padre() const;
-	void set_padre(Entidad* padre);	
 	TipoObjeto get_tipoObjeto() const;
 
 private :
 	TipoObjeto tipoObjeto;
 
-protected :
-	Entidad* padre;
 };
 
 #endif //__Objeto__
