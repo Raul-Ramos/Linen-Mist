@@ -48,6 +48,7 @@ public:
 	vector<Habitacion*> get_salidas() const;
 	int get_fase() const;
 	void set_fase(const int fase);
+	TipoHabitacion get_tipoHabitacion() const;
 
 private :
 	TipoHabitacion tipoHabitacion;

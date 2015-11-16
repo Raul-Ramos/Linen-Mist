@@ -3,8 +3,11 @@
 
 #include <vector>
 #include <string>
+#include <memory>
+
 #include "Entidad.h"
 #include "Habitacion.h"
+
 
 using namespace std;
 
@@ -20,10 +23,11 @@ public:
 
 private :
 	//Lista de entidades
-	vector<Entidad> entidades;
+	vector<unique_ptr<Entidad>> entidades;
 	//Puntero que indica que habitación se está visitando
 	Habitacion* visitando;
 
+	void take(const string objetoDeseado);
 	void go(const string destinoDeseado);
 };
 

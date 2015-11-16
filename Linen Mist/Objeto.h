@@ -6,9 +6,9 @@
 
 using namespace std;
 
-enum tipoObjeto
+enum TipoObjeto
 {
-	NORMAL,
+	GENERICO,
 	CARNE,
 	VENENO,
 	LLAVE,
@@ -24,10 +24,14 @@ enum tipoObjeto
 class Objeto : public Entidad
 {
 public:
-	Objeto(const char* nombre, const char* descripcion, Entidad* padre);
+	Objeto(const char* nombre, const char* descripcion, Entidad* padre, TipoObjeto tipoObjeto = GENERICO);
 
 	Entidad* get_padre() const;
 	void set_padre(Entidad* padre);	
+	TipoObjeto get_tipoObjeto() const;
+
+private :
+	TipoObjeto tipoObjeto;
 
 protected :
 	Entidad* padre;

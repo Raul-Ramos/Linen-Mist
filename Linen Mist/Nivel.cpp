@@ -8,6 +8,7 @@
 
 #include "Nivel.h"
 #include "Habitacion.h"
+#include "Objeto.h"
 
 using namespace std;
 
@@ -26,22 +27,26 @@ Nivel::Nivel(){
 	Habitacion* rellano = new Habitacion("landing", "landing description");
 	Habitacion* estudio = new Habitacion("study", "study description");
 	Habitacion* niebla = new Habitacion("linen mist", "linen mist description", TipoHabitacion::NIEBLA);
+	
 
 	//Conexiones entre habitaciones
 	frontal->AsignarEnlace(NORTE,barbacoa, false);
 	frontal->AsignarEnlace(SUR,jardin, false);
-	frontal->AsignarEnlace(OESTE,niebla, true);
+	frontal->AsignarEnlace(OESTE,niebla, false);
 
 	jardin->AsignarEnlace(OESTE,frontal,false);
 	jardin->AsignarEnlace(ESTE,trasera,false);
 	jardin->AsignarEnlace(ARRIBA,casaDelArbol,true);
+	jardin->AsignarEnlace(SUR,niebla,false);
 	
 	barbacoa->AsignarEnlace(OESTE,frontal,false);
 	barbacoa->AsignarEnlace(ESTE,trasera,false);
+	barbacoa->AsignarEnlace(NORTE,niebla, false);
 
 	trasera->AsignarEnlace(NORTE, barbacoa, false);
 	trasera->AsignarEnlace(SUR,jardin,false);
 	trasera->AsignarEnlace(OESTE,garage,true);
+	frontal->AsignarEnlace(ESTE,niebla, false);
 	
 	garage->AsignarEnlace(NORTE, cocina, true);
 	cocina->AsignarEnlace(OESTE, recibidor, true);
@@ -49,11 +54,31 @@ Nivel::Nivel(){
 	recibidor->AsignarEnlace(ARRIBA, rellano, true);
 	rellano->AsignarEnlace(OESTE, estudio, true);
 
-	//Objetos.
+	niebla->AsignarEnlace(ESTE,frontal,false);
+	niebla->AsignarEnlace(NORTE,frontal,false);
+	niebla->AsignarEnlace(SUR,frontal,false);
+	niebla->AsignarEnlace(OESTE,frontal,false);
 
+	//Contenedores
+	Objeto* joyero = new Objeto("box", "descr", casaDelArbol);
+	entidades.emplace_back(joyero);
+	Objeto* cajaHerramientas = new Objeto("toolbox", "descr", garage);
+	entidades.emplace_back(cajaHerramientas);
+
+	//Objetos.
+	entidades.emplace_back(new Objeto("poison", "descr", jardin, VENENO));
+	entidades.emplace_back(new Objeto("meat", "descr", barbacoa, CARNE));
+	entidades.emplace_back(new Objeto("hairpin", "descr", joyero, LLAVE));
+	entidades.emplace_back(new Objeto("coin", "descr", joyero));
+	entidades.emplace_back(new Objeto("photo", "descr", joyero));
+	entidades.emplace_back(new Objeto("wirecutter", "descr", cajaHerramientas, TENAZAS));
+	entidades.emplace_back(new Objeto("knife","descr", cocina, CUCHILLO));
+	entidades.emplace_back(new Objeto("telephone","descr", recibidor, TELEFONO));
+	entidades.emplace_back(new Objeto("portrait","descr", recibidor));
+	entidades.emplace_back(new Objeto("money","descr", estudio, DINERO));
 
 	//Puntero que indica dónde está el personaje
-	visitando = frontal;
+	visitando = niebla;
 
 }
 
@@ -85,8 +110,10 @@ void Nivel::operacion(const vector<string> operacion) {
 
 			case 2:
 				//Funcion GO
-				if (operacion.at(0).compare("GO") == 0){
+				if (operacion.at(0).compare("go") == 0){
 					this->go(operacion.at(1));
+				} else if (operacion.at(0).compare("take") == 0){
+					this->take(operacion.at(1));
 				} // Comando no entendido
 				else {cout << "I can't do that.";}
 				break;
@@ -107,18 +134,23 @@ void Nivel::operacion(const vector<string> operacion) {
 	}
 }
 
+//Funcion para tomar un objeto
+void Nivel::take(const string objetoDeseado){
+
+}
+
 //Funcion para ir de una habitacion a otra
 void Nivel::go(const string destinoDeseado){
 
 	//Comprueba qué dirección se ha escrito
 	OrientacionSalida destino = NINGUNA;
 
-	if (destinoDeseado.compare("NORTH") == 0){ destino = NORTE;
-	} else if (destinoDeseado.compare("SOUTH") == 0){ destino = SUR;
-	} else if (destinoDeseado.compare("EAST") == 0){ destino = ESTE;
-	} else if (destinoDeseado.compare("WEST") == 0){ destino = OESTE;
-	} else if (destinoDeseado.compare("UPSTAIRS") == 0){ destino = ARRIBA;
-	} else if (destinoDeseado.compare("DOWNSTAIRS") == 0){ destino = ABAJO;
+	if (destinoDeseado.compare("north") == 0){ destino = NORTE;
+	} else if (destinoDeseado.compare("south") == 0){ destino = SUR;
+	} else if (destinoDeseado.compare("east") == 0){ destino = ESTE;
+	} else if (destinoDeseado.compare("west") == 0){ destino = OESTE;
+	} else if (destinoDeseado.compare("upstairs") == 0){ destino = ARRIBA;
+	} else if (destinoDeseado.compare("downstairs") == 0){ destino = ABAJO;
 	}
 
 	//Si se ha escrito una direccion valida
@@ -136,6 +168,16 @@ void Nivel::go(const string destinoDeseado){
 			} else { //Si no, simplemente se dice que se ha regresado.
 				cout << "You return to the " << visitar->get_nombre() << ".";
 			}
+
+			//Si la habitacion destino es de niebla, todos sus vecinos
+			//se cambian a la habitacion de origen
+			if(visitar->get_tipoHabitacion() == NIEBLA){
+				visitar->AsignarEnlace(NORTE,visitando,false);
+				visitar->AsignarEnlace(SUR,visitando,false);
+				visitar->AsignarEnlace(ESTE,visitando,false);
+				visitar->AsignarEnlace(OESTE,visitando,false);
+			}
+
 			//Se cambia la habitacion que estamos visitando actualmente.
 			visitando = visitar;
 

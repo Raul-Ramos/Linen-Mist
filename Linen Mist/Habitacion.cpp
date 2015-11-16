@@ -52,3 +52,4 @@ void Habitacion::AsignarEnlace(const OrientacionSalida direccion, Habitacion* ve
 vector<Habitacion*> Habitacion::get_salidas() const {return salidas;}
 int Habitacion::get_fase() const {return fase;}
 void Habitacion::set_fase(const int fase) {this->fase = fase;}
+TipoHabitacion Habitacion::get_tipoHabitacion() const {return tipoHabitacion;}

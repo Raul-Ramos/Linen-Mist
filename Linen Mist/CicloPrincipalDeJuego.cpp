@@ -4,6 +4,7 @@
 
 #include "iostream"
 #include "sstream"
+#include <algorithm>
 
 #include "CicloPrincipalDeJuego.h"
 #include "Nivel.h"
@@ -49,7 +50,7 @@ vector<string> CicloDeJuego::separarPalabras(const string &comando, vector<strin
     while (getline(ss, palabra, ' ')) {
 
 		//Pasa la palabra a mayusculas
-		transform(palabra.begin(), palabra.end(), palabra.begin(), ::toupper);
+		transform(palabra.begin(), palabra.end(), palabra.begin(), ::tolower);
 
 		//Almacena la palabra en el voctor Elementos
         elementos.push_back(palabra);
