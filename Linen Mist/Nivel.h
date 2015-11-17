@@ -31,6 +31,8 @@ private :
 	void take(const string objetoDeseado);
 	void drop(const string objetoDeseado, const string contenedorDeseado = "");
 	void go(const string destinoDeseado);
+	void examine(const string objetoDeseado);
+	void nombrarObjetosContenidos(const Entidad* entidad);
 };
 
 #endif //__Nivel__

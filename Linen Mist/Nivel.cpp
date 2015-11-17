@@ -27,7 +27,6 @@ Nivel::Nivel(){
 	Habitacion* rellano = new Habitacion("landing", "landing description");
 	Habitacion* estudio = new Habitacion("study", "study description");
 	Habitacion* niebla = new Habitacion("linen mist", "linen mist description", TipoHabitacion::NIEBLA);
-	
 
 	//Conexiones entre habitaciones
 	frontal->AsignarEnlace(NORTE,barbacoa, false);
@@ -80,6 +79,20 @@ Nivel::Nivel(){
 	//Puntero que indica dónde está el personaje
 	visitando = niebla;
 
+	//Añade las habitaciones a la lista
+	entidades.emplace_back(frontal);
+	entidades.emplace_back(jardin);
+	entidades.emplace_back(barbacoa);
+	entidades.emplace_back(trasera);
+	entidades.emplace_back(casaDelArbol);
+	entidades.emplace_back(garage);
+	entidades.emplace_back(cocina);
+	entidades.emplace_back(recibidor);
+	entidades.emplace_back(despensa);
+	entidades.emplace_back(rellano);
+	entidades.emplace_back(estudio);
+	entidades.emplace_back(niebla);
+
 }
 
 void Nivel::operacion(const vector<string> operacion) {
@@ -118,7 +131,23 @@ void Nivel::operacion(const vector<string> operacion) {
 				} //Funcion DROP X
 				else if (operacion.at(0).compare("drop") == 0) {
 					this->drop(operacion.at(1));
-				} // Comando no entendido
+				} //Funcion Examine X
+				else if (operacion.at(0).compare("examine") == 0) {
+					//Si es "room" examina la habitación
+					if (operacion.at(1).compare("room") == 0){
+						this->examine(visitando->get_nombre());
+					}else {
+						this->examine(operacion.at(1));
+					}
+				} //Funcion Look (igual que examine)
+				else if (operacion.at(0).compare("look") == 0) {
+					if (operacion.at(1).compare("around") == 0) {
+						this->examine(visitando->get_nombre());
+					}
+					else {
+						this->examine(operacion.at(1));
+					}
+				}// Comando no entendido
 				else {cout << "You can't do that.";}
 				break;
 
@@ -323,9 +352,80 @@ void Nivel::go(const string destinoDeseado){
 			visitando = visitar;
 
 		} else { // Direccion no valida
-			cout << "I can't go " << destinoDeseado << " from here.";
+			cout << "You can't go " << destinoDeseado << " from here.";
 		}
 	} else { // Direccion inexistente
-		cout << "I can only go North, South, West, East, Upstairs and Downstairs.";
+		cout << "You can only go North, South, West, East, Upstairs and Downstairs.";
+	}
+}
+
+void Nivel::examine(const string objetoDeseado)
+{
+	//Se busca el objeto deseado
+	Entidad* entidad = buscarEntidad(objetoDeseado);
+
+	//Si se ha encontrado el objeto
+	if (entidad != NULL) {
+
+		//Busca la última entidad no contenida
+		Entidad* puntero = entidad;
+		while (puntero->get_padre() != NULL) {
+			puntero = puntero->get_padre();
+		}
+
+		//Si el objeto está en la habitacion o en el inventario
+		if (puntero == visitando || puntero == entidad) {
+
+			//Devuelve la descripción
+			cout << entidad->get_descripcion();
+
+			//Si es una habitación o un objeto de tipo
+			//contenedor, imprime su contenido
+			if (entidad->get_tipoEntidad() == HABITACION || 
+				(entidad->get_tipoEntidad() == ITEM &&
+				static_cast<Objeto*>(entidad)->get_tipoObjeto() == CONTENEDOR)) {
+
+				nombrarObjetosContenidos(entidad);
+			}
+
+		} //Si el objeto no está en la habitación o en el inventario
+		else { cout << "You can't do that.";}
+	} //Si no se ha encontrado
+	else { cout << "You can't do that.";}
+}
+
+//Imprime por pantalla un mensaje nombrando todas las entidades
+//directamente contenidas por la entidad que se pasa como parámetro
+void Nivel::nombrarObjetosContenidos(const Entidad * entidad)
+{
+	vector<string> contiene;
+
+	//Devuelve el nombre de las entidades que tengan la entidad pasada
+	//a la función como parametro asignadas como padre
+	for (int i = 0; i < entidades.size(); i++) {
+		if (entidades.at(i).get()->get_padre() == entidad) {
+			contiene.push_back(entidades.at(i).get()->get_nombre());
+		}
+	}
+
+	//Imprime lo encontrado
+	cout << "\n\n";
+	if (contiene.size() == 0) {
+		cout << "There's nothing particularly useful in it.";}
+	else {
+		string mensaje = "Contains ";
+
+		for (int i = 0; i < contiene.size(); i++)
+		{
+			if (i == contiene.size() - 1 && contiene.size() > 1) {
+				mensaje.append(" and ");
+			} else if (i > 0) {
+				mensaje.append(", ");
+			}
+
+			mensaje.append(contiene.at(i));
+		}
+
+		cout << mensaje;
 	}
 }
