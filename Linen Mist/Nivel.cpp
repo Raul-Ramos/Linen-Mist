@@ -200,12 +200,7 @@ void Nivel::take(const string objetoDeseado){
 			//La variable de puntero ahora se utilizará para buscar
 			//el último contenedor no contenido
 			Entidad* objeto = static_cast<Objeto*>(puntero);
-			puntero = objeto;
-
-			//Busca la última entidad no contenida
-			while (puntero->get_padre() != NULL) {
-				puntero = puntero->get_padre();
-			}
+			puntero = buscarUltimoPadre(puntero);
 
 			//Si esta entidad es la habitacion actual, el objeto se puede tomar
 			if (puntero == visitando) {
@@ -236,76 +231,68 @@ void Nivel::drop(const string objetoDeseado, const string contenedorDeseado) {
 	//Se busca el objeto deseado
 	Entidad* contenido = buscarEntidad(objetoDeseado);
 
-	//Si se ha encontrado el objeto
-	if (contenido != NULL) {
-
-		//Si el objeto está realmente en el inventorio
-		if (contenido->get_padre() == NULL) {
-
-			//Si contenedor está en null significa que se quiere dejar en la
-			//habitación actual
-			if (contenedorDeseado == "") {
-
-				contenido->set_padre(visitando);
-				cout << "You dropped " << contenido->get_nombre() << " to the ground.";
-
-			} //Si el contenedor no es null, significa que se quiere dejar
-			//dentro de otro contenedor
-			else {
-
-				//Buscamos el contenedor deseado
-				Entidad* contenedor = buscarEntidad(contenedorDeseado);
-
-				//Si se ha encontrado el contenedor
-				if (contenedor != NULL) {
-
-					//Busca la última entidad no contenida
-					Entidad* puntero = contenedor;
-					while (puntero->get_padre() != NULL) {
-						puntero = puntero->get_padre();
-					}
-
-					//Si el contenedor está en la habitacion o en el inventario
-					if (puntero == visitando || puntero == contenido) {
-
-						//Si el contenedor es un item
-						if (contenedor->get_tipoEntidad() == ITEM) {
-
-							//Se hace cast para acceder a propiedades de Objetos
-							Objeto* contenedorObj = static_cast<Objeto*>(contenedor);
-
-							//Si es un objeto de tipo contenedor
-							if (contenedorObj->get_tipoObjeto() == CONTENEDOR){
-
-								//Asignamos el contenedor como padre del objeto contenido
-								//y avisamos al usuario
-								contenido->set_padre(contenedor);
-								cout << "You put " << contenido->get_nombre() << " inside " << contenedor->get_nombre() << ".";
-
-							} //Si no es un objeto de tipo contenedor
-							else {
-								cout << "You can't put objects in " << contenedorObj->get_nombre() << ".";
-							}
-						} //Si el contenedor no es un item
-						else {
-							cout << "You can't do that.";
-						}
-					} //Si el contenedor no es accesible
-					else {
-						cout << "You can't do that.";
-					}
-				} //Si no se ha encontrado el contenedor
-				else {
-					cout << "You don't have any object with that name.";
-				}
-			}
-		} //Si el objeto no está en el inventorio
-		else {
-			cout << "You don't have any object with that name.";
-		}
-	} //Si no se ha encontrado el objeto
-	else {
+	//SALE - Si no se ha encontrado el objeto
+	if (contenido == NULL) {
 		cout << "You don't have any object with that name.";
+		return;
+	}
+
+	//SALE -  Si el objeto no está realmente en el inventorio
+	if (contenido->get_padre() != NULL) {
+		cout << "You don't have any object with that name.";
+		return;
+	}
+
+	//Si contenedor está en null significa que se quiere dejar en la
+	//habitación actual
+	if (contenedorDeseado == "") {
+
+		contenido->set_padre(visitando);
+		cout << "You dropped " << contenido->get_nombre() << " to the ground.";
+
+	} //Si el contenedor no es null, significa que se quiere dejar
+	  //dentro de otro contenedor
+	else {
+		//Buscamos el contenedor deseado
+		Entidad* contenedor = buscarEntidad(contenedorDeseado);
+
+		//SALE - Si no se ha encontrado el contenedor
+		if (contenedor != NULL) {
+			cout << "You don't have any object with that name.";
+			return;
+		}
+
+		//Busca la última entidad no contenida
+		Entidad* puntero = buscarUltimoPadre(contenedor);
+
+		//SALE -  Si el contenedor NO está en la habitacion o en el inventario
+		//(No es accesible)
+		if (!(puntero == visitando || puntero == contenido)) {
+			cout << "You can't do that.";
+			return;
+		}
+
+		//SALE - Si el contenedor no es un item
+		if (contenedor->get_tipoEntidad() == ITEM) {
+			cout << "You can't do that.";
+			return;
+		}
+
+		//Se hace cast para acceder a propiedades de Objetos
+		Objeto* contenedorObj = static_cast<Objeto*>(contenedor);
+
+		//Si es un objeto de tipo contenedor
+		if (contenedorObj->get_tipoObjeto() == CONTENEDOR) {
+
+			//Asignamos el contenedor como padre del objeto contenido
+			//y avisamos al usuario
+			contenido->set_padre(contenedor);
+			cout << "You put " << contenido->get_nombre() << " inside " << contenedor->get_nombre() << ".";
+
+		} //SALE - Si no es un objeto de tipo contenedor
+		else {
+			cout << "You can't put objects in " << contenedorObj->get_nombre() << ".";
+		}
 	}
 }
 
@@ -368,10 +355,7 @@ void Nivel::examine(const string objetoDeseado)
 	if (entidad != NULL) {
 
 		//Busca la última entidad no contenida
-		Entidad* puntero = entidad;
-		while (puntero->get_padre() != NULL) {
-			puntero = puntero->get_padre();
-		}
+		Entidad* puntero = buscarUltimoPadre(entidad);
 
 		//Si el objeto está en la habitacion o en el inventario
 		if (puntero == visitando || puntero == entidad) {
@@ -428,4 +412,15 @@ void Nivel::nombrarObjetosContenidos(const Entidad * entidad)
 
 		cout << mensaje;
 	}
+}
+
+//Se le pasa una entidad como parámetro y busca la última
+//entidad que lo contiene
+Entidad * Nivel::buscarUltimoPadre(Entidad * entidad)
+{
+	Entidad* puntero = entidad;
+	while (puntero->get_padre() != NULL) {
+		puntero = puntero->get_padre();
+	}
+	return puntero;
 }

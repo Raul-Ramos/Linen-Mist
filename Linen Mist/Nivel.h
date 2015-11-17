@@ -33,6 +33,7 @@ private :
 	void go(const string destinoDeseado);
 	void examine(const string objetoDeseado);
 	void nombrarObjetosContenidos(const Entidad* entidad);
+	Entidad* buscarUltimoPadre(Entidad* entidad);
 };
 
 #endif //__Nivel__
