@@ -9,6 +9,7 @@
 #include "Nivel.h"
 #include "Habitacion.h"
 #include "Objeto.h"
+#include "Puerta.h"
 
 using namespace std;
 
@@ -45,7 +46,7 @@ Nivel::Nivel(){
 	trasera->AsignarEnlace(NORTE, barbacoa, false);
 	trasera->AsignarEnlace(SUR,jardin,false);
 	trasera->AsignarEnlace(OESTE,garage,true);
-	frontal->AsignarEnlace(ESTE,niebla, false);
+	trasera->AsignarEnlace(ESTE,niebla, false);
 	
 	garage->AsignarEnlace(NORTE, cocina, true);
 	cocina->AsignarEnlace(OESTE, recibidor, true);
@@ -63,6 +64,8 @@ Nivel::Nivel(){
 	entidades.emplace_back(joyero);
 	Objeto* cajaHerramientas = new Objeto("toolbox", "descr", garage, CONTENEDOR);
 	entidades.emplace_back(cajaHerramientas);
+	EntidadCerrable* cajaFuerte = new EntidadCerrable("desk safe", "descr", estudio, CLAVE);
+	entidades.emplace_back(cajaFuerte);
 
 	//Objetos.
 	entidades.emplace_back(new Objeto("poison", "descr", jardin, VENENO));
@@ -74,7 +77,13 @@ Nivel::Nivel(){
 	entidades.emplace_back(new Objeto("knife","descr", cocina, CUCHILLO));
 	entidades.emplace_back(new Objeto("telephone","descr", recibidor, TELEFONO));
 	entidades.emplace_back(new Objeto("portrait","descr", recibidor));
-	entidades.emplace_back(new Objeto("money","descr", estudio, DINERO));
+	entidades.emplace_back(new Objeto("money","descr", cajaFuerte, DINERO));
+
+	//Puertas.
+	entidades.emplace_back(new Puerta("front door", "descr", frontal));
+	entidades.emplace_back(new Puerta("back door", "descr", trasera, garage, CANDADO));
+	entidades.emplace_back(new Puerta("blue door", "descr", rellano));
+	entidades.emplace_back(new Puerta("red door", "descr", rellano));
 
 	//Puntero que indica dónde está el personaje
 	visitando = niebla;
@@ -109,17 +118,23 @@ void Nivel::operacion(const vector<string> operacion) {
 					&& operacion.at(2).compare("in") == 0){
 					this->drop(operacion.at(1), operacion.at(3));
 				} // Comando no entendido
-				else {cout << "I can't do that.";}
+				else {cout << "You can't do that.";}
 				break;
 
 			case 3:
-				/*
-				if (operacion.at(0).compare("LOOK") == 0){
-					cout << "I see";
-				}
-				else {cout << "I can't do that.";}
+				//Función OPEN XX
+				if (operacion.at(0).compare("open") == 0){
+					this->open(operacion.at(1) + " " + operacion.at(2));
+				} //Función CLOSE XX
+				else if (operacion.at(0).compare("close") == 0){
+					this->close(operacion.at(1) + " " + operacion.at(2));
+				} //Función UNLOCK/PICKLOCK XX
+				else if (operacion.at(0).compare("unlock") == 0 ||
+					operacion.at(0).compare("picklock") == 0) {
+					this->unlock(operacion.at(1) + " " + operacion.at(2));
+				}// Comando no entendido
+				else {cout << "You can't do that.";}
 				break;
-				*/
 
 			case 2:
 				//Funcion GO X
@@ -152,13 +167,11 @@ void Nivel::operacion(const vector<string> operacion) {
 				break;
 
 			case 1:
-				/*
 				if (operacion.at(0).compare("LOOK") == 0){
 					cout << "I see";
 				}
-				else {cout << "I can't do that";}
+				else {cout << "You can't do that";}
 				break;
-				*/
 
 			default:
 				cout << "Only commands up to four words are accepted.";
@@ -220,7 +233,7 @@ void Nivel::take(const string objetoDeseado){
 		}
 	} //Si no se ha encontrado el objeto
 	else {
-		cout << "You can't take that.";
+		cout << "You can't do that.";
 	}
 }
 
@@ -231,14 +244,10 @@ void Nivel::drop(const string objetoDeseado, const string contenedorDeseado) {
 	//Se busca el objeto deseado
 	Entidad* contenido = buscarEntidad(objetoDeseado);
 
-	//SALE - Si no se ha encontrado el objeto
-	if (contenido == NULL) {
-		cout << "You don't have any object with that name.";
-		return;
-	}
-
-	//SALE -  Si el objeto no está realmente en el inventorio
-	if (contenido->get_padre() != NULL) {
+	//SALE - Si no se ha encontrado el objeto o no está
+	//en el inventorio
+	if (contenido == NULL ||
+		contenido->get_padre() != NULL) {
 		cout << "You don't have any object with that name.";
 		return;
 	}
@@ -257,7 +266,7 @@ void Nivel::drop(const string objetoDeseado, const string contenedorDeseado) {
 		Entidad* contenedor = buscarEntidad(contenedorDeseado);
 
 		//SALE - Si no se ha encontrado el contenedor
-		if (contenedor != NULL) {
+		if (contenedor == NULL) {
 			cout << "You don't have any object with that name.";
 			return;
 		}
@@ -266,14 +275,9 @@ void Nivel::drop(const string objetoDeseado, const string contenedorDeseado) {
 		Entidad* puntero = buscarUltimoPadre(contenedor);
 
 		//SALE -  Si el contenedor NO está en la habitacion o en el inventario
-		//(No es accesible)
-		if (!(puntero == visitando || puntero == contenido)) {
-			cout << "You can't do that.";
-			return;
-		}
-
-		//SALE - Si el contenedor no es un item
-		if (contenedor->get_tipoEntidad() == ITEM) {
+		//(No es accesible) o no es un item
+		if (!(puntero == visitando || puntero == contenido) ||
+			contenedor->get_tipoEntidad() != ITEM) {
 			cout << "You can't do that.";
 			return;
 		}
@@ -313,8 +317,42 @@ void Nivel::go(const string destinoDeseado){
 	//Si se ha escrito una direccion valida
 	if(destino != NINGUNA){
 
-		//Si se puede ir donde se quiere
 		Habitacion* visitar = visitando->get_salidas().at(destino);
+
+		//Se buscan puertas que puedan estar cerradas e impidan el paso
+		Entidad* puntero;
+
+		//Se recorren todas las entidades
+		for (int i = 0; i < entidades.size(); i++)
+		{
+			puntero = entidades.at(i).get();
+
+			//Si es una puerta y está en esta habitación
+			if (puntero->get_tipoEntidad() == PUERTA,
+				puntero->get_padre() == visitando) {
+
+				//Si además va hacia el destino deseado
+				Puerta* puerta = static_cast<Puerta*>(puntero);
+				if (puerta->get_destino() == visitar) {
+
+					//Si la puerta está bloqueada, se cancela
+					if (puerta->get_bloqueado() == true) {
+						cout << "You can't go there, the " << puerta->get_nombre() << " is locked.";
+						return;
+					} //Si la puerta está cerrada, se cancela
+					else if (puerta->get_cerrado() == true) {
+						cout << "You can't go there, the " << puerta->get_nombre() << " is closed.";
+						return;
+					}
+					break;
+				}
+
+			}
+		}
+
+		//Se revisa si existe algún lugar al que ir realmente en esa dirección
+		//(Se hace posteriormente a la busqueda de puertas para mostrar el mensaje
+		//de puerta cerrada en caso de que exista)
 		if (visitar != NULL){
 
 			//Si no ha sido visitado nunca antes (fase 0), se
@@ -376,6 +414,128 @@ void Nivel::examine(const string objetoDeseado)
 		else { cout << "You can't do that.";}
 	} //Si no se ha encontrado
 	else { cout << "You can't do that.";}
+}
+
+//Abre entidades cerrables
+void Nivel::open(const string objetoDeseado)
+{
+	//Se busca el objeto deseado
+	Entidad* entidad = buscarEntidad(objetoDeseado);
+
+	//SALE - Si la entidad no es un cerrable o puerta
+	if (entidad->get_tipoEntidad() != CERRABLE &&
+		entidad->get_tipoEntidad() != PUERTA) {
+		cout << "You can't do that.";
+		return;
+	}
+
+	//Cast a cerrable para acceder a sus propiedades
+	EntidadCerrable* cerrable = static_cast<EntidadCerrable*>(entidad);
+
+	//Si ya está abierto
+	if (cerrable->get_cerrado() == false) {
+		cout << cerrable->get_nombre() << " is already open.";
+	} //Si está bloqueado
+	else if(cerrable->get_bloqueado() == true) {
+		cout << cerrable->get_nombre() << " seems firmly locked.";
+	} //Si no hay problemas
+	else {
+		cerrable->set_cerrado(false);
+		cout << cerrable->get_nombre() << " is now open.";
+	}
+
+}
+
+//TODO: VER INVENTORIO
+//TODO: NO PUEDES HACER GO SI LA PUERTA ESTÁ CERRADA
+
+//Cierra entidades cerrables
+void Nivel::close(const string objetoDeseado)
+{
+	//Se busca el objeto deseado
+	Entidad* entidad = buscarEntidad(objetoDeseado);
+
+	//SALE - Si la entidad no es un cerrable
+	if (entidad->get_tipoEntidad() != CERRABLE &&
+		entidad->get_tipoEntidad() != PUERTA) {
+		cout << "You can't do that.";
+		return;
+	}
+
+	//Cast a cerrable para acceder a sus propiedades
+	EntidadCerrable* cerrable = static_cast<EntidadCerrable*>(entidad);
+
+	//Si ya está cerrado
+	if (cerrable->get_cerrado() == true) {
+		cout << "The " << cerrable->get_nombre() << " is already closed.";
+	} //Si no hay problemas
+	else {
+		cerrable->set_cerrado(true);
+		cout << "The " << cerrable->get_nombre() << " is now closed.";
+	}
+}
+
+void Nivel::unlock(const string objetoDeseado)
+{
+	//Se busca el objeto deseado
+	Entidad* entidad = buscarEntidad(objetoDeseado);
+
+	//SALE - Si el objeto no está en la habitación actual
+	//o si la entidad no es un cerrable o puerta
+	if (buscarUltimoPadre(entidad) != visitando
+		|| (entidad->get_tipoEntidad() != CERRABLE &&
+			entidad->get_tipoEntidad() != PUERTA)) {
+		cout << "You can't do that";
+	}
+
+	//Cast a cerrable para acceder a sus propiedades
+	EntidadCerrable* cerrable = static_cast<EntidadCerrable*>(entidad);
+
+	//SALE - Si es un objeto permanentemente cerrado
+	if (cerrable->get_tipoCerrable() == PERMACLOSED) {
+		cout << "You can't figure out how to open this.";
+		return;
+	}
+
+	//SALE - Si ya está desbloqueado
+	if (cerrable->get_bloqueado() == false) {
+		cout << cerrable->get_nombre() << " is already unlocked.";
+		return;
+	}
+
+	//Si está cerrada por candado
+	if (cerrable->get_tipoCerrable() == CANDADO) {
+
+		//Busca una llave en el inventorio
+		Objeto* llave = NULL;
+		Entidad* puntero;
+		int indice;
+
+		for (indice = 0; indice < entidades.size(); indice++)
+		{
+			//Si está en el inventorio, es un item y es una llave,
+			//busqueda resuelta
+			puntero = entidades.at(indice).get();
+			if (puntero->get_padre() == NULL &&
+				puntero->get_tipoEntidad() == ITEM &&
+				static_cast<Objeto*>(puntero)->get_tipoObjeto() == LLAVE) {
+				llave = static_cast<Objeto*>(puntero);
+				break;
+			}
+		}
+
+		//SALE - Si no se ha encontrado
+		if (llave == NULL) {
+			cout << "You can't figure out how to open this.";
+			return;
+		}
+
+		//Si nada más falla, se desbloquea
+		cout << "The " << cerrable->get_nombre() << " has been unlocked. However, you broke the " << llave->get_nombre() << " in the process.";
+		cerrable->set_bloqueado(false);
+		entidades.erase(entidades.begin() + indice);
+
+	}
 }
 
 //Imprime por pantalla un mensaje nombrando todas las entidades

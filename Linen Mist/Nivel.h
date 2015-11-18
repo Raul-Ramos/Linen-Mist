@@ -32,6 +32,10 @@ private :
 	void drop(const string objetoDeseado, const string contenedorDeseado = "");
 	void go(const string destinoDeseado);
 	void examine(const string objetoDeseado);
+	void open(const string objetoDeseado);
+	void close(const string objetoDeseado);
+	void unlock(const string objetoDeseado);
+
 	void nombrarObjetosContenidos(const Entidad* entidad);
 	Entidad* buscarUltimoPadre(Entidad* entidad);
 };

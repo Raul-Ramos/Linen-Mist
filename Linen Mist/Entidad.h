@@ -10,7 +10,9 @@ enum TipoDeEntidad
 {
 	UNDEFINED,
 	ITEM,
-	HABITACION
+	HABITACION,
+	CERRABLE,
+	PUERTA
 };
 
 //Entidad. Existencia material dentro del juego, con un nombre
