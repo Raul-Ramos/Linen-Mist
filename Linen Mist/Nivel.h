@@ -35,6 +35,12 @@ private :
 	void open(const string objetoDeseado);
 	void close(const string objetoDeseado);
 	void unlock(const string objetoDeseado);
+	void poison(const string objetoDeseado);
+	void give(const string objetoDeseado, const string NPCDeseado);
+	void stab(const string objetoDeseado);
+	void kill(Entidad * entidad);
+	void cut(const string objetoDeseado, const string herramienta);
+	void talk(const string NPCDeseado);
 
 	void nombrarObjetosContenidos(const Entidad* entidad);
 	Entidad* buscarUltimoPadre(Entidad* entidad);

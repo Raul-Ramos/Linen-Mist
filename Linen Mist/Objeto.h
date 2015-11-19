@@ -11,10 +11,12 @@ enum TipoObjeto
 	GENERICO,
 	CARNE,
 	VENENO,
+	CARNE_ENVENENADA,
 	LLAVE,
 	CUCHILLO,
 	TENAZAS,
 	TELEFONO,
+	TELEFONO_ROTO,
 	DINERO,
 	CONTENEDOR
 };
@@ -28,6 +30,7 @@ public:
 	Objeto(const char* nombre, const char* descripcion, Entidad* padre, const TipoObjeto tipoObjeto = GENERICO);
 
 	TipoObjeto get_tipoObjeto() const;
+	void set_tipoObjeto(const TipoObjeto tipoObjeto);
 
 private :
 	TipoObjeto tipoObjeto;

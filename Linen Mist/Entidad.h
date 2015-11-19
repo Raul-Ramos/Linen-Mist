@@ -12,7 +12,8 @@ enum TipoDeEntidad
 	ITEM,
 	HABITACION,
 	CERRABLE,
-	PUERTA
+	PUERTA,
+	TIPONPC
 };
 
 //Entidad. Existencia material dentro del juego, con un nombre

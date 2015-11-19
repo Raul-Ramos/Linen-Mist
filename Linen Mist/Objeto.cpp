@@ -11,3 +11,4 @@ Entidad(nombre, descripcion, padre), tipoObjeto(tipoObjeto)
 
 //Gets/Sets
 TipoObjeto Objeto::get_tipoObjeto() const {return tipoObjeto;}
+void Objeto::set_tipoObjeto(const TipoObjeto tipoObjeto) { this->tipoObjeto = tipoObjeto; }

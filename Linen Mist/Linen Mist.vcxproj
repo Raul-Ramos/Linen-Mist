@@ -93,6 +93,7 @@
     <ClCompile Include="Habitacion.cpp" />
     <ClCompile Include="Linen Mist.cpp" />
     <ClCompile Include="Nivel.cpp" />
+    <ClCompile Include="NPC.cpp" />
     <ClCompile Include="Objeto.cpp" />
     <ClCompile Include="Puerta.cpp" />
     <ClCompile Include="stdafx.cpp">
@@ -105,6 +106,7 @@
     <ClInclude Include="Entidad.h" />
     <ClInclude Include="Habitacion.h" />
     <ClInclude Include="Nivel.h" />
+    <ClInclude Include="NPC.h" />
     <ClInclude Include="Objeto.h" />
     <ClInclude Include="EntidadCerrable.h" />
     <ClInclude Include="Puerta.h" />

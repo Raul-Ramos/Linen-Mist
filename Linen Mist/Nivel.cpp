@@ -10,6 +10,7 @@
 #include "Habitacion.h"
 #include "Objeto.h"
 #include "Puerta.h"
+#include "NPC.h"
 
 using namespace std;
 
@@ -79,6 +80,12 @@ Nivel::Nivel(){
 	entidades.emplace_back(new Objeto("portrait","descr", recibidor));
 	entidades.emplace_back(new Objeto("money","descr", cajaFuerte, DINERO));
 
+	//NPC
+	NPC* perro = new NPC("dog", "descr", trasera, "mensjdd");
+	vector<OrientacionSalida>* guardian = perro->get_guardia();
+	guardian->push_back(OESTE);
+	entidades.emplace_back(perro);
+
 	//Puertas.
 	entidades.emplace_back(new Puerta("front door", "descr", frontal));
 	entidades.emplace_back(new Puerta("back door", "descr", trasera, garage, CANDADO));
@@ -117,6 +124,14 @@ void Nivel::operacion(const vector<string> operacion) {
 				if (operacion.at(0).compare("put") == 0
 					&& operacion.at(2).compare("in") == 0){
 					this->drop(operacion.at(1), operacion.at(3));
+				} //Funcion GIVE X TO Y
+				else if (operacion.at(0).compare("give") == 0
+					&& operacion.at(2).compare("to") == 0) {
+					this->give(operacion.at(1), operacion.at(3));
+				} //Funcion CUT X WITH Y
+				else if (operacion.at(0).compare("cut") == 0
+					&& operacion.at(2).compare("with") == 0) {
+					this->cut(operacion.at(1), operacion.at(3));
 				} // Comando no entendido
 				else {cout << "You can't do that.";}
 				break;
@@ -132,6 +147,10 @@ void Nivel::operacion(const vector<string> operacion) {
 				else if (operacion.at(0).compare("unlock") == 0 ||
 					operacion.at(0).compare("picklock") == 0) {
 					this->unlock(operacion.at(1) + " " + operacion.at(2));
+				} //Función TALK TO XX
+				else if (operacion.at(0).compare("talk") == 0 &&
+					operacion.at(1).compare("to") == 0) {
+					this->talk(operacion.at(2));
 				}// Comando no entendido
 				else {cout << "You can't do that.";}
 				break;
@@ -162,7 +181,13 @@ void Nivel::operacion(const vector<string> operacion) {
 					else {
 						this->examine(operacion.at(1));
 					}
-				}// Comando no entendido
+				} //Funcion POISON X
+				else if (operacion.at(0).compare("poison") == 0) {
+					this->poison(operacion.at(1));
+				} //Funcion STAB X
+				else if (operacion.at(0).compare("stab") == 0) {
+					this->stab(operacion.at(1));
+				} // Comando no entendido
 				else {cout << "You can't do that.";}
 				break;
 
@@ -327,26 +352,43 @@ void Nivel::go(const string destinoDeseado){
 		{
 			puntero = entidades.at(i).get();
 
-			//Si es una puerta y está en esta habitación
-			if (puntero->get_tipoEntidad() == PUERTA,
-				puntero->get_padre() == visitando) {
+			//Si está en esta habitación
+			if (puntero->get_padre() == visitando) {
 
-				//Si además va hacia el destino deseado
-				Puerta* puerta = static_cast<Puerta*>(puntero);
-				if (puerta->get_destino() == visitar) {
+				//Si también es una puerta
+				if (puntero->get_tipoEntidad() == PUERTA) {
 
-					//Si la puerta está bloqueada, se cancela
-					if (puerta->get_bloqueado() == true) {
-						cout << "You can't go there, the " << puerta->get_nombre() << " is locked.";
-						return;
-					} //Si la puerta está cerrada, se cancela
-					else if (puerta->get_cerrado() == true) {
-						cout << "You can't go there, the " << puerta->get_nombre() << " is closed.";
-						return;
+					//Si además va hacia el destino deseado
+					Puerta* puerta = static_cast<Puerta*>(puntero);
+					if (puerta->get_destino() == visitar) {
+
+						//Si la puerta está bloqueada, se cancela
+						if (puerta->get_bloqueado() == true) {
+							cout << "You can't go there, the " << puerta->get_nombre() << " is locked.";
+							return;
+						} //Si la puerta está cerrada, se cancela
+						else if (puerta->get_cerrado() == true) {
+							cout << "You can't go there, the " << puerta->get_nombre() << " is closed.";
+							return;
+						}
 					}
-					break;
 				}
 
+				//Si es un NPC y está vivo
+				if (puntero->get_tipoEntidad() == TIPONPC &&
+					static_cast<NPC*>(puntero)->get_vida() > 0) {
+
+					//Si bloquea la salida deseada, se cancela
+					vector<OrientacionSalida>* guardia = static_cast<NPC*>(puntero)->get_guardia();
+					for (int i = 0; i < guardia->size(); i++)
+					{
+						if (guardia->at(0) == destino) {
+							cout << "The " << puntero->get_nombre() << " is blocking your way in that direction.";
+							return;
+						}
+					}
+
+				}
 			}
 		}
 
@@ -475,17 +517,19 @@ void Nivel::close(const string objetoDeseado)
 	}
 }
 
+//Desbloquea entidades bloqueadas
 void Nivel::unlock(const string objetoDeseado)
 {
 	//Se busca el objeto deseado
 	Entidad* entidad = buscarEntidad(objetoDeseado);
 
-	//SALE - Si el objeto no está en la habitación actual
+	//SALE - Si el objeto no existe, no está en la habitación actual
 	//o si la entidad no es un cerrable o puerta
-	if (buscarUltimoPadre(entidad) != visitando
+	if (entidad == NULL
+		|| buscarUltimoPadre(entidad) != visitando
 		|| (entidad->get_tipoEntidad() != CERRABLE &&
 			entidad->get_tipoEntidad() != PUERTA)) {
-		cout << "You can't do that";
+		cout << "You can't do that.";
 	}
 
 	//Cast a cerrable para acceder a sus propiedades
@@ -536,6 +580,270 @@ void Nivel::unlock(const string objetoDeseado)
 		entidades.erase(entidades.begin() + indice);
 
 	}
+}
+
+//Envenena entidades
+void Nivel::poison(const string objetoDeseado)
+{
+	//Se busca el veneno
+	Entidad* puntero;
+	Objeto* veneno = NULL;
+	int indice;
+
+	for (indice = 0; indice < entidades.size(); indice++)
+	{
+		//Si está en el inventario, es un item y es veneno,
+		//busqueda resuelta
+		puntero = entidades.at(indice).get();
+		if (puntero->get_padre() == NULL &&
+			puntero->get_tipoEntidad() == ITEM &&
+			static_cast<Objeto*>(puntero)->get_tipoObjeto() == VENENO) {
+			veneno = static_cast<Objeto*>(puntero);
+			break;
+		}
+	}
+
+	//Si no se ha encontrado
+	if (veneno == NULL) {
+		cout << "You don't have any poison.";
+		return;
+	}
+
+	//Se busca el objeto deseado
+	Entidad* entidad = buscarEntidad(objetoDeseado);
+
+	//Si no se ha encontrado
+	if (entidad == NULL) {
+		cout << "You can't do that";
+		return;
+	}
+
+	//Busca la última entidad no contenida
+	puntero = buscarUltimoPadre(entidad);
+
+	//Si el objeto no está en el inventario o en la habitacion actual
+	if (puntero != entidad &&
+		puntero != visitando) {
+		cout << "You can't do that.";
+		return;
+	}
+
+	//Si es un NPC
+	if (entidad->get_tipoEntidad() == TIPONPC){
+		cout << "I can't poison " << entidad->get_nombre() << " directly.";
+		return;
+	}
+
+	//Si es la carne
+	if (entidad->get_tipoEntidad() == ITEM &&
+		static_cast<Objeto*>(entidad)->get_tipoObjeto() == CARNE) {
+
+		//Se envenena la carne y se elimina el veneno
+		Objeto* carne = static_cast<Objeto*>(entidad);
+		carne->set_tipoObjeto(CARNE_ENVENENADA);
+		carne->set_descripcion("A poisoned meatball. It doesn't make much of a difference with your mother-in-law cooking.");
+
+		cout << "You poisoned " << entidad->get_nombre() << ". You used all the poison.";
+		entidades.erase(entidades.begin() + indice);
+
+	} //Si no es la carne
+	else {
+		cout << "That doesn't make any sense.";
+	}
+}
+
+//Da un objeto a otra entidad
+void Nivel::give(const string objetoDeseado, const string NPCDeseado)
+{
+	//Se busca el objeto a dar
+	Entidad* origen = buscarEntidad(objetoDeseado);
+
+	//Si no se ha encontrado el objeto
+	if (origen == NULL) {
+		cout << "You don't have any " << objetoDeseado;
+		return;
+	}
+	
+	Entidad* puntero = buscarUltimoPadre(origen);
+
+	//Si no está en el inventario
+	if (puntero != origen) {
+		cout << "You don't have any " << objetoDeseado;
+		return;
+	}
+
+	//Se busca el NPC al que dar
+	Entidad* destino = buscarEntidad(NPCDeseado);
+
+	// Si no se ha encontrado el objeto
+	if (destino == NULL) {
+		cout << "You can't give that to " << NPCDeseado;
+		return;
+	}
+
+	puntero = buscarUltimoPadre(destino);
+
+	//Si no está en la habitación actual o no es un NPC
+	if (puntero != visitando ||
+		destino->get_tipoEntidad() != TIPONPC) {
+		cout << "You can't give that to " << NPCDeseado;
+		return;
+	}
+
+	Objeto* objeto = static_cast<Objeto*>(origen);
+	NPC* npc = static_cast<NPC*>(destino);
+	
+	if(objeto->get_tipoObjeto() == CARNE ||
+		objeto->get_tipoObjeto() == CARNE_ENVENENADA){
+
+		cout << NPCDeseado << " happily eats the meatball.";
+
+		//Si está envenada, mata al NPC
+		if (objeto->get_tipoObjeto() == CARNE_ENVENENADA) {
+			kill(npc);
+		}
+
+		//Elimina la carne
+		for (int i = 0; i < entidades.size(); i++) {
+			if (entidades.at(i).get() == origen) { entidades.erase(entidades.begin() + i); }
+		}
+
+	} //Si no es nada de lo anterior
+	else {
+		cout << NPCDeseado << " seems uninterested in " << objetoDeseado << ".";
+	}
+
+}
+
+//Apuñala a una entidad
+void Nivel::stab(const string objetoDeseado)
+{
+	//Se busca el cuchillo
+	Entidad* puntero;
+	Objeto* cuchillo = NULL;
+	int indice;
+
+	for (int i = 0; indice < entidades.size(); indice++)
+	{
+		//Si está en el inventario, es un item y es un cuchillo,
+		//busqueda resuelta
+		puntero = entidades.at(indice).get();
+		if (puntero->get_padre() == NULL &&
+			puntero->get_tipoEntidad() == ITEM &&
+			static_cast<Objeto*>(puntero)->get_tipoObjeto() == CUCHILLO) {
+			cuchillo = static_cast<Objeto*>(puntero);
+			break;
+		}
+	}
+
+	//Si no se ha encontrado
+	if (cuchillo == NULL) {
+		cout << "You don't have any knife.";
+		return;
+	}
+
+	//Se busca el objeto deseado
+	Entidad* entidad = buscarEntidad(objetoDeseado);
+
+	//Busca la última entidad no contenida
+	puntero = buscarUltimoPadre(entidad);
+
+	//Si el objeto no está en la habitacion actual
+	if (puntero != visitando) {
+		cout << "You can't do that.";
+		return;
+	}
+
+	//Mata a la entidad
+	kill(puntero);
+
+}
+
+//Mata a una entidad
+void Nivel::kill(Entidad * entidad)
+{
+	//Si es un NPC
+	if (entidad->get_tipoEntidad() == TIPONPC) {
+
+		NPC* victima = static_cast<NPC*>(entidad);
+
+		//Si no está muerto
+		if (victima->get_vida() > 0) {
+			victima->set_vida(0);
+			cout << victima->get_mensajeMuerte();
+		}
+		else {
+			cout << victima->get_nombre() << " is already dead.";
+		}
+
+		return;
+	}
+}
+
+//Corta algo
+void Nivel::cut(const string objetoDeseado, const string herramienta)
+{
+	//Se busca el objeto a cortar
+	Entidad* origen = buscarEntidad(objetoDeseado);
+
+	//Si no se ha encontrado el objeto
+	if (origen == NULL) {
+		cout << "You can't do that.";
+		return;
+	}
+
+	Entidad* puntero = buscarUltimoPadre(origen);
+
+	//Si no está en el inventario o habitacion actual,
+	// y no es un objeto
+	if ((puntero != origen
+		&& puntero != visitando)
+		|| origen->get_tipoEntidad() != ITEM) {
+		cout << "You can't do that.";
+		return;
+	}
+
+	//Se busca la entidad con la que cortar
+	Entidad* destino = buscarEntidad(herramienta);
+
+	// Si no se ha encontrado el objeto
+	if (destino == NULL) {
+		cout << "You can't do that.";
+		return;
+	}
+
+	puntero = buscarUltimoPadre(destino);
+
+	//Si no está en el inventorio
+	if (puntero != destino 
+		|| destino->get_tipoEntidad() != ITEM) {
+		cout << "You can't do that.";
+		return;
+	}
+
+	Objeto* Oobjeto = static_cast<Objeto*>(origen);
+	Objeto* Oherramienta = static_cast<Objeto*>(destino);
+
+	if (Oobjeto->get_tipoObjeto() == TELEFONO
+		&& Oherramienta->get_tipoObjeto() == TENAZAS) {
+
+		Oobjeto->set_tipoObjeto(TELEFONO_ROTO);
+		Oobjeto->set_descripcion(Oobjeto->get_descripcion().append(" The wire is cut, so it doesn't have line."));
+		cout << "You have cut the phone wire.";
+
+
+	} //Si no es nada de lo anterior
+	else {
+		cout << "Nothing happened.";
+	}
+
+
+}
+
+//Habla con alguien
+void Nivel::talk(const string NPCDeseado)
+{
+	cout << NPCDeseado << " doesn't seem interested in talking.";
 }
 
 //Imprime por pantalla un mensaje nombrando todas las entidades
