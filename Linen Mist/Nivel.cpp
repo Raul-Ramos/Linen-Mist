@@ -18,18 +18,30 @@ Nivel::Nivel(){
 	tiempo = NULL;
 
 	//Inicializacion del habitaciones
-	Habitacion* frontal = new Habitacion("porch", "porch description");
-	Habitacion* jardin = new Habitacion("garden", "garden description");
-	Habitacion* barbacoa = new Habitacion("barbecue place", "barbecue place description");
-	Habitacion* trasera = new Habitacion("backyard", "backyard description");
-	Habitacion* casaDelArbol = new Habitacion ("treehouse interior", "treehouse interior description");
-	Habitacion* garage = new Habitacion("garage","garage description");
-	Habitacion* cocina = new Habitacion("kitchen", "kitchen description");
-	Habitacion* recibidor = new Habitacion("entrance hall", "entrance hall description");
-	Habitacion* despensa = new Habitacion("pantry ", "pantry  description");
-	Habitacion* rellano = new Habitacion("landing", "landing description");
-	Habitacion* estudio = new Habitacion("study", "study description");
-	Habitacion* niebla = new Habitacion("linen mist", "linen mist description", TipoHabitacion::NIEBLA);
+	char* texto = { "[You walk and walk in the linen mist. It seems endless. A menacing, limitless nightmare whose will you're following. After walking what feels like hours, the mist seems to be fading. Seems like it's midnight. Walking in that direction, you see a shadowy structure in front of you].\n\nYou're in front of a big suburb's house. White walls and red roof, it feels like the typical house you've always seen in fiction. You feel the impulse to get inside." };
+	Habitacion* frontal = new Habitacion("porch",texto);
+	texto = { "The south side of the house is a garden. Little plots contain a large variety of flora; tomatoes, artichokes, marigolds, saffron...Seems like someone was gardening not long ago, as some equipment is left under a shed.\nThe biggest tree has a tire in the ground, with two ropes - with their extremes broken - firmly tied to it. Upon further inspection you see there's a well hidden treehouse, with some stairs to climb them." };
+	Habitacion* jardin = new Habitacion("garden", texto);
+	texto = { "This place has a lot of benches and a grill. Seems like had a barbecue party no long ago. From outside the fence, the omnipresent mist awaits."};
+	Habitacion* barbacoa = new Habitacion("barbecue place", texto);
+	texto = { "The backyard. There's a backdoor, but there's a stupid dog guarding it. Upon seein you, he barked loudly. He must have awaken the entire neighborhood..." };
+	Habitacion* trasera = new Habitacion("backyard", texto);
+	texto = { "The treehouse interior structure is solid, but its decoration is chaotic. The dispersed pencils, the drawings in the floor...Seems like some childs had a meeting not long ago." };
+	Habitacion* casaDelArbol = new Habitacion ("treehouse interior", texto);
+	texto = { "You're inside. It's great not to have the mist presence upon you. The garage isn't used as a garage. Rather, it's a amateur carpenter workshop. I'm sure the workbench where the toolbox is was the one used for building that treehouse." };
+	Habitacion* garage = new Habitacion("garage",texto);
+	texto = { "The kitchen. Nothing particulary great about it. The fridge has a lot of child paintings, but everything seems a bit disused. Seems like they go to restaurants a lot.\nThere's a calendar hanging in the wall. 1987...So that's the year we're on." };
+	Habitacion* cocina = new Habitacion("kitchen", texto);
+	texto = { "The entrance hall. There's a pantry just north, and there's stairs to the second floor. In a corner you can see a small altar to a woman, photo included." };
+	Habitacion* recibidor = new Habitacion("entrance hall", texto);
+	texto = { "As you enter the pantry, your heart freezes. It's a child...No, it's Annah. She's whimping. You look at her eyes. She knows what you did. She knows your face. A cold feeling crosses your body. You...you can't leave it like this. But...\n\nThere's nowhere no go. There's no scape.\n\nYou have to do it." };
+	Habitacion* despensa = new Habitacion("pantry ", texto);
+	texto = { "The landing. There's a blue door and a red door. To the west, another room." };
+	Habitacion* rellano = new Habitacion("landing", texto);
+	texto = { "The study. Seems like someone has spend a lot of time in here lately. Maybe it's a workingplace? There are a lot of sketches everywhere. Whatever result the artist wants, he isn't getting it." };
+	Habitacion* estudio = new Habitacion("study", texto);
+	texto = { "The linen mist. The omnipresent presence." };
+	Habitacion* niebla = new Habitacion("linen mist", texto, TipoHabitacion::NIEBLA);
 
 	//Conexiones entre habitaciones
 	frontal->AsignarEnlace(NORTE,barbacoa, false);
@@ -79,7 +91,7 @@ Nivel::Nivel(){
 	entidades.emplace_back(new Objeto("knife","descr", cocina, CUCHILLO));
 	entidades.emplace_back(new Objeto("telephone","descr", recibidor, TELEFONO));
 	entidades.emplace_back(new Objeto("portrait","descr", recibidor));
-	entidades.emplace_back(new Objeto("money","descr", NULL, DINERO));
+	entidades.emplace_back(new Objeto("money","descr", cajaFuerte, DINERO));
 
 	//NPC
 	NPC* perro = new NPC("dog", "descr", trasera, "mensjdd");
@@ -98,7 +110,7 @@ Nivel::Nivel(){
 	entidades.emplace_back(new Puerta("red door", "descr", rellano));
 
 	//Puntero que indica dónde está el personaje
-	visitando = estudio;
+	visitando = niebla;
 
 	//Añade las habitaciones a la lista
 	entidades.emplace_back(frontal);
