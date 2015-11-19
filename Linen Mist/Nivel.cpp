@@ -3,8 +3,6 @@
 // de la trama
 
 #include "stdafx.h"
-#include <iostream>
-#include <algorithm>
 
 #include "Nivel.h"
 #include "Habitacion.h"
@@ -15,6 +13,9 @@
 using namespace std;
 
 Nivel::Nivel(){
+
+	gameOver = false;
+	tiempo = NULL;
 
 	//Inicializacion del habitaciones
 	Habitacion* frontal = new Habitacion("porch", "porch description");
@@ -78,7 +79,7 @@ Nivel::Nivel(){
 	entidades.emplace_back(new Objeto("knife","descr", cocina, CUCHILLO));
 	entidades.emplace_back(new Objeto("telephone","descr", recibidor, TELEFONO));
 	entidades.emplace_back(new Objeto("portrait","descr", recibidor));
-	entidades.emplace_back(new Objeto("money","descr", cajaFuerte, DINERO));
+	entidades.emplace_back(new Objeto("money","descr", NULL, DINERO));
 
 	//NPC
 	NPC* perro = new NPC("dog", "descr", trasera, "mensjdd");
@@ -86,14 +87,18 @@ Nivel::Nivel(){
 	guardian->push_back(OESTE);
 	entidades.emplace_back(perro);
 
+	entidades.emplace_back(new NPC("girl", "descr", despensa, "You did it", FINALE));
+
 	//Puertas.
 	entidades.emplace_back(new Puerta("front door", "descr", frontal));
 	entidades.emplace_back(new Puerta("back door", "descr", trasera, garage, CANDADO));
+	entidades.emplace_back(new Puerta("pantry door", "descr", recibidor, despensa, CANDADO));
+	entidades.emplace_back(new Puerta("pantry exit", "descr", despensa, recibidor));
 	entidades.emplace_back(new Puerta("blue door", "descr", rellano));
 	entidades.emplace_back(new Puerta("red door", "descr", rellano));
 
 	//Puntero que indica dónde está el personaje
-	visitando = niebla;
+	visitando = estudio;
 
 	//Añade las habitaciones a la lista
 	entidades.emplace_back(frontal);
@@ -112,6 +117,12 @@ Nivel::Nivel(){
 }
 
 void Nivel::operacion(const vector<string> operacion) {
+
+	//NARRATIVA - Si en el finale han pasado mas de 15 segundos
+	if (tiempo != NULL && difftime(time(NULL), tiempo) > 15) {
+		die();
+		return;
+	}
 
 	//Se asegura de que se ha escrito algo
 	if ( operacion.size() < 1) {
@@ -151,7 +162,11 @@ void Nivel::operacion(const vector<string> operacion) {
 				else if (operacion.at(0).compare("talk") == 0 &&
 					operacion.at(1).compare("to") == 0) {
 					this->talk(operacion.at(2));
-				}// Comando no entendido
+				} //Funcion Look / Examine (igual que examine)
+				else if (operacion.at(0).compare("look") == 0 ||
+					operacion.at(0).compare("examine") == 0 ) {
+					this->examine(operacion.at(1) + " " + operacion.at(2));
+				} // Comando no entendido
 				else {cout << "You can't do that.";}
 				break;
 
@@ -205,6 +220,9 @@ void Nivel::operacion(const vector<string> operacion) {
 	}
 }
 
+//Get/Set
+bool Nivel::isGameOver() const { return gameOver;}
+
 //Busca una entidad en la lista de entidades, la devuelve si le encuentra
 //y si no devuelve null
 Entidad * Nivel::buscarEntidad(const string entidadDeseada)
@@ -237,7 +255,7 @@ void Nivel::take(const string objetoDeseado){
 			//Objeto se registra en una nueva variable
 			//La variable de puntero ahora se utilizará para buscar
 			//el último contenedor no contenido
-			Entidad* objeto = static_cast<Objeto*>(puntero);
+			Objeto* objeto = static_cast<Objeto*>(puntero);
 			puntero = buscarUltimoPadre(puntero);
 
 			//Si esta entidad es la habitacion actual, el objeto se puede tomar
@@ -247,6 +265,15 @@ void Nivel::take(const string objetoDeseado){
 				//que está en el inventario) y se avisa al usuario;
 				objeto->set_padre(NULL);
 				cout << "You took " << objeto->get_nombre() << ".";
+
+				//NARRATIVA: Si el objeto cogido es dinero, en el hall
+				//se pasa a fase 2
+				if (objeto->get_tipoObjeto() == DINERO) {
+					Habitacion * hall = static_cast<Habitacion*>(buscarEntidad("entrance hall"));
+					if (hall->get_fase() == 1) {
+						hall->set_fase(2);
+					}
+				}
 
 			}
 			else { //Si el objeto existe pero no es accesible, disimulamos
@@ -382,7 +409,7 @@ void Nivel::go(const string destinoDeseado){
 					vector<OrientacionSalida>* guardia = static_cast<NPC*>(puntero)->get_guardia();
 					for (int i = 0; i < guardia->size(); i++)
 					{
-						if (guardia->at(0) == destino) {
+						if (guardia->at(i) == destino) {
 							cout << "The " << puntero->get_nombre() << " is blocking your way in that direction.";
 							return;
 						}
@@ -418,6 +445,12 @@ void Nivel::go(const string destinoDeseado){
 			//Se cambia la habitacion que estamos visitando actualmente.
 			visitando = visitar;
 
+			//NARRATIVA: Si la habitacion destino tiene fase 2
+			//empieza el prefinale.
+			if (visitar->get_fase() == 2) {
+				prefinale();
+			}
+
 		} else { // Direccion no valida
 			cout << "You can't go " << destinoDeseado << " from here.";
 		}
@@ -443,11 +476,11 @@ void Nivel::examine(const string objetoDeseado)
 			//Devuelve la descripción
 			cout << entidad->get_descripcion();
 
-			//Si es una habitación o un objeto de tipo
-			//contenedor, imprime su contenido
-			if (entidad->get_tipoEntidad() == HABITACION || 
-				(entidad->get_tipoEntidad() == ITEM &&
-				static_cast<Objeto*>(entidad)->get_tipoObjeto() == CONTENEDOR)) {
+			//Si es una habitación, un objeto de tipo
+			//contenedor o un objeto cerrable abierto, imprime su contenido
+			if ((entidad->get_tipoEntidad() == HABITACION) ||
+				(entidad->get_tipoEntidad() == ITEM && static_cast<Objeto*>(entidad)->get_tipoObjeto() == CONTENEDOR) ||
+				(entidad->get_tipoEntidad() == CERRABLE && static_cast<EntidadCerrable*>(entidad)->get_cerrado() == false)) {
 
 				nombrarObjetosContenidos(entidad);
 			}
@@ -580,6 +613,21 @@ void Nivel::unlock(const string objetoDeseado)
 		entidades.erase(entidades.begin() + indice);
 
 	}
+	else if (cerrable->get_tipoCerrable() == CLAVE) {
+
+		string comando;
+		cout << "Enter code: ";
+		getline(cin, comando);
+
+		if (comando.compare("1950") == 0) {
+			cout << "\n\nCorrect code. Unlocked.";
+			cerrable->set_bloqueado(false);
+		}
+		else {
+			cout << "\n\nInvalid code. ";
+		}
+
+	}
 }
 
 //Envenena entidades
@@ -696,7 +744,7 @@ void Nivel::give(const string objetoDeseado, const string NPCDeseado)
 	if(objeto->get_tipoObjeto() == CARNE ||
 		objeto->get_tipoObjeto() == CARNE_ENVENENADA){
 
-		cout << NPCDeseado << " happily eats the meatball.";
+		cout << NPCDeseado << " happily eats the meatball. ";
 
 		//Si está envenada, mata al NPC
 		if (objeto->get_tipoObjeto() == CARNE_ENVENENADA) {
@@ -716,14 +764,14 @@ void Nivel::give(const string objetoDeseado, const string NPCDeseado)
 }
 
 //Apuñala a una entidad
-void Nivel::stab(const string objetoDeseado)
+void Nivel::stab(const string victima)
 {
 	//Se busca el cuchillo
 	Entidad* puntero;
 	Objeto* cuchillo = NULL;
 	int indice;
 
-	for (int i = 0; indice < entidades.size(); indice++)
+	for (int indice = 0; indice < entidades.size(); indice++)
 	{
 		//Si está en el inventario, es un item y es un cuchillo,
 		//busqueda resuelta
@@ -743,10 +791,16 @@ void Nivel::stab(const string objetoDeseado)
 	}
 
 	//Se busca el objeto deseado
-	Entidad* entidad = buscarEntidad(objetoDeseado);
+	Entidad* Ovictima = buscarEntidad(victima);
+
+	//Si no se ha encontrado
+	if (Ovictima == NULL) {
+		cout << "You can't do that.";
+		return;
+	}
 
 	//Busca la última entidad no contenida
-	puntero = buscarUltimoPadre(entidad);
+	puntero = buscarUltimoPadre(Ovictima);
 
 	//Si el objeto no está en la habitacion actual
 	if (puntero != visitando) {
@@ -755,7 +809,7 @@ void Nivel::stab(const string objetoDeseado)
 	}
 
 	//Mata a la entidad
-	kill(puntero);
+	kill(Ovictima);
 
 }
 
@@ -771,12 +825,25 @@ void Nivel::kill(Entidad * entidad)
 		if (victima->get_vida() > 0) {
 			victima->set_vida(0);
 			cout << victima->get_mensajeMuerte();
+
+			//NARRATIVA - Acaba el quicktime event
+			tiempo = NULL;
+
+			//NARRATIVA - Si se mata al "jefe final",
+			//se pasa al finale
+			if (victima->get_tipoNPC() == FINALE) {
+				finale();
+			}
+
 		}
 		else {
 			cout << victima->get_nombre() << " is already dead.";
 		}
 
 		return;
+	}
+	else {
+		cout << "You can't kill that.";
 	}
 }
 
@@ -892,3 +959,115 @@ Entidad * Nivel::buscarUltimoPadre(Entidad * entidad)
 	}
 	return puntero;
 }
+
+void Nivel::prefinale()
+{
+	cout << "\n\n You're not alone. You see a middle aged man ";
+
+	//Se busca el telefono
+	Entidad* telefono = buscarEntidad("telephone");
+
+	//Si el telefono no está en la habitacion
+	if (telefono->get_padre() != visitando){
+		cout << "desperately trying to find the telephone, with no success.";
+	} //Si el telefono está cortado
+	else if (static_cast<Objeto*>(telefono)->get_tipoObjeto() == TELEFONO_ROTO){
+		cout << "desperately trying to use the phone, until his blood freezes when he notices someone has cut the wire.";
+	} //Si te ha pillado, game over
+	else {
+		cout << "hanging the phone. A second later he notices you. Holding a revolver, he says 'I have already called the police! You have nowhere to go!'.\nYou know when to surrender. Yes, you could silence him here and now, but you won't have time to scape until the police arrives. It's pointless.\nYou get on your knees, staring at the phone. If you had done something about it...\nThe loud noise of the police's siren breaks your train of thought. You close your eyes trying to make everything disappear...\n\nBut you can't scape. Not until you do it.\n\n";
+		gameOver = true;
+		return;
+	}
+
+	char* muerte = {"You run towards the man like you have never run before. You can move his arm fast enough with a precise elbow hit, and he shoots to the ceiling. Out of the weapon range, you slice his throat open.\n\nYou don't feel much of a thing. It happens. You're sure you thought the house would be empty when you planned the robbery. Sometimes, things just go wrong, and you have to do something about them.\nYou only regret this has become so easy to do. You don't want to feel the same anguish, the same distress of the first time. It was the worst sensation in your life. But you should feel something...Don't you?\n\n You watch as he falls to his knees. Every word trying to get out of his mouth scapes in is neck as bubbles in a crimson lake. But he isn't looking at you. He is looking at the pantry door, which you would swear just gasped."};
+	//Se crea el hombre, un NPC que no te deja ir a ninguna parte. Muere apuñalandolo
+	NPC* hombre = new NPC("man","A middle aged man.",visitando,muerte);
+	vector<OrientacionSalida>* guardian = hombre->get_guardia();
+	guardian->push_back(OESTE);
+	guardian->push_back(ESTE);
+	guardian->push_back(NORTE);
+	guardian->push_back(SUR);
+	guardian->push_back(ARRIBA);
+	guardian->push_back(ABAJO);
+	entidades.emplace_back(hombre);
+
+	//Se suelta una llave
+	entidades.emplace_back(new Objeto("key", "A key to the pantry.", visitando, LLAVE));
+
+	//Se pone en situación
+	cout << " Your last step has alerted him, and he turns around. You can feel how fear takes over every muscle of his body, distorting his face in a terror grimace, making his legs tremble in disbelief.\n\n As he draws the revolver out of his pocket, a small key falls to the ground. He hysterically looks to the key, then to the pantry, then back to the key. You see an opportunity in this panic reaction, but as you make a single step, he points the gun at your.\n\nYou have been in this situation before. The dread eyes, the shaking gun...This rookie hasn't shoot before, but something is off. The finger is situated steadily in the trigger, without hesitation. He will shoot, you're sure of it. Is he protecting something?\n\nYou don't have time to think. It has come to you or him. It's not the first time you do this.\n\nIt's time to him to go.";
+
+	//Empieza un quicktime event
+	cin.ignore();
+	cout << "\n\nWhen the counter reachs 5, you will have 15 seconds to do something. Think fast.";
+	for (int i = 5; i > 0; i--)
+	{
+		cout << "\n\n" << i;
+		_sleep(1000);
+	}
+	cout << "\n\nGO!";
+	this->tiempo = time(NULL);
+}
+
+//Si pierdes el quicktime event
+void Nivel::die()
+{
+	cout << "\n\nYou were fast. But not fast enough.\n\nYou're not sure of what gets to you before. Maybe the burning, excruciating pain in your chest. Maybe the sound of the gunpowder smell. No, it certainly was the explosion sound as the bullet left the revolver.\n\nStaring at the ceiling, resting in a pool of your own blood, you decide it doesn't matter. You hear a sound. Seems like the trembling hand of the man let the gun go. Who knows what kind of tears is he shedding. Terror at you still living presence? Horror at what he has done? Relief at killing the dangerous criminal?\n\nYou don't care. You just stare at the ceiling, incapable of doing anything more. And as you stare and everything starts to get dark, you smile. Why? Why do you feel like dying was the best you could do? Why do you feel like you have finally avoided a monster that has been hunting you for ages?\n\nSmiling gets to laughing as you imagine your face; a big smile in your lips but a confused expression everywhere else. What a stupid face you must be making!\nAnd there goes; a single relief tear, a sole explorer wanting to meet the red your clothes are soaking in.\n\nBut as your vision blurs, it resembles the mist. That linen mist. And your body panics again. You feel the sudden need to run, run away from this place. But you body doesn't answer. You feel the neeed to scream, but your mouth won't open. As the fog in your eyes becomes black you give up to insanity.\n\nYou know you will never rest. Not until you do it.\n\n";
+	gameOver = true;
+}
+
+void Nivel::finale()
+{
+	cout << "\n\nYou just did it again.\n\nThe blood drops from the pointy end, falling all the way to the once white daisies in her dress. It feels unreal. \n\n> ";
+
+	string comando;
+	getline(cin, comando);
+
+	cout << "\nYou want to do something, anything. \n\n> ";
+
+	getline(cin, comando);
+
+	cout << "\nBut your muscles won't answer. \n\n> ";
+	getline(cin, comando);
+
+	cout << "\nI hope it was worthy. \n\n> ";
+	getline(cin, comando);
+
+	cout << "\nIt's not just sadness that has stolen you body. You're not your own anymore. You don't feel anything, but you feel everything. Emotions are flooding your mind now that you've renounced to your humanity. You're nothing but a broken soul in a rusted body. \n\n> ";
+	getline(cin, comando);
+
+	cout << "\nAnd soon, it will come again. \n\n> ";
+	getline(cin, comando);
+
+	cout << "\nThe linen mist will come, and it will make you do it again. It will erase your memory and it will make you feel broken again, \n\n> ";
+
+	for (int i = 0; i < 3; i++)
+	{
+		getline(cin, comando);
+		cout << "\nand again,  \n\n> ";
+	}
+	getline(cin, comando);
+
+	cout << "\nand again.\n\nIt's you punishement. It's your torture for what you once did. It will follow you forever. \n\n> ";
+	getline(cin, comando);
+
+	cout << "Here it comes.\n\nThe linen mist, sliding under the door. Always hunting. Always there.\n\nTry to speak. \n\n> ";
+	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 0);
+	getline(cin, comando);
+	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 7);
+
+	cout << "Nothing. You can't even hear your own thinking. The linen mist gets in your lungs, burning like hellfire. You feel like you're choking, but trying to breathe just makes it worse and worse. \n\n> ";
+	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 0);
+	getline(cin, comando);
+	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 7);
+
+	cout << "You fall to the ground, in an agony no man could endure. Your innards are rotting alive, your brain is being stabbed by thousands of knives. Insanity. Despair. \n\n> ";
+	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 0);
+	getline(cin, comando);
+	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 7);
+
+	cout << "You're one with the mist. You don't feel relieved. It will end soon, but it will begin soon. The hell that will torment you forever.\n\n\n\nEven if you do it.\n\n";
+	gameOver = true;
+}
+

@@ -20,7 +20,7 @@ enum TipoNPC
 class NPC : public Entidad
 {
 public:
-	NPC(const char* nombre, const char* descripcion, Entidad* padre, char* mensajeMuerte, const const TipoNPC tipoNPC = CORRIENTE);
+	NPC(const char* nombre, const char* descripcion, Entidad* padre, char* mensajeMuerte, const TipoNPC tipoNPC = CORRIENTE);
 
 	int get_vida() const;
 	void set_vida(const int vida);

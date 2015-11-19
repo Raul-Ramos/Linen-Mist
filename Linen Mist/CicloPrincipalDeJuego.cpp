@@ -2,10 +2,6 @@
 //
 #include "stdafx.h"
 
-#include "iostream"
-#include "sstream"
-#include <algorithm>
-
 #include "CicloPrincipalDeJuego.h"
 #include "Nivel.h"
 
@@ -35,6 +31,11 @@ void CicloDeJuego::iniciar()
 		instrucciones.clear();
 		separarPalabras(comando, instrucciones);
 		nivel->operacion(instrucciones);
+
+		if (nivel->isGameOver() == true) {
+			delete nivel;
+			nivel = new Nivel();
+		}
 	}
 }
 
