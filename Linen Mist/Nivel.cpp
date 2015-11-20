@@ -22,25 +22,25 @@ Nivel::Nivel(){
 	Habitacion* frontal = new Habitacion("porch",texto);
 	texto = { "The south side of the house is a garden. Little plots contain a large variety of flora; tomatoes, artichokes, marigolds, saffron...Seems like someone was gardening not long ago, as some equipment is left under a shed.\nThe biggest tree has a tire in the ground, with two ropes - with their extremes broken - firmly tied to it. Upon further inspection you see there's a well hidden treehouse, with some stairs to climb them." };
 	Habitacion* jardin = new Habitacion("garden", texto);
-	texto = { "This place has a lot of benches and a grill. Seems like had a barbecue party no long ago. From outside the fence, the omnipresent mist awaits."};
+	texto = { "This place has a lot of benches and a grill. Seems like had a barbecue party not long ago. From outside the fence, the omnipresent mist awaits."};
 	Habitacion* barbacoa = new Habitacion("barbecue place", texto);
 	texto = { "The backyard. There's a backdoor, but there's a stupid dog guarding it. Upon seein you, he barked loudly. He must have awaken the entire neighborhood..." };
 	Habitacion* trasera = new Habitacion("backyard", texto);
-	texto = { "The treehouse interior structure is solid, but its decoration is chaotic. The dispersed pencils, the drawings in the floor...Seems like some childs had a meeting not long ago." };
+	texto = { "The treehouse interior structure solid and seems recently constructed, but its decoration is chaotic. The dispersed pencils, the drawings in the floor...Seems like some childs had a meeting not long ago." };
 	Habitacion* casaDelArbol = new Habitacion ("treehouse interior", texto);
-	texto = { "You're inside. It's great not to have the mist presence upon you. The garage isn't used as a garage. Rather, it's a amateur carpenter workshop. I'm sure the workbench where the toolbox is was the one used for building that treehouse." };
+	texto = { "You're inside. It's great not to have the mist presence upon you. The garage isn't used as a it. Rather, it's a amateur carpenter workshop. You're sure the workbench where the toolbox is was the one used for building that treehouse. However, tire marks on the floor indicate there used to be a familiar car in here at some point." };
 	Habitacion* garage = new Habitacion("garage",texto);
 	texto = { "The kitchen. Nothing particulary great about it. The fridge has a lot of child paintings, but everything seems a bit disused. Seems like they go to restaurants a lot.\nThere's a calendar hanging in the wall. 1987...So that's the year we're on." };
 	Habitacion* cocina = new Habitacion("kitchen", texto);
-	texto = { "The entrance hall. There's a pantry just north, and there's stairs to the second floor. In a corner you can see a small altar to a woman, photo included." };
+	texto = { "The entrance hall. There's a pantry just north, and there's stairs to the second floor. In a corner you can see a small altar to a woman, photo included. It feels new. Tragedy has struck this house lately." };
 	Habitacion* recibidor = new Habitacion("entrance hall", texto);
-	texto = { "As you enter the pantry, your heart freezes. It's a child...No, it's Annah. She's whimping. You look at her eyes. She knows what you did. She knows your face. A cold feeling crosses your body. You...you can't leave it like this. But...\n\nThere's nowhere no go. There's no scape.\n\nYou have to do it." };
+	texto = { "As you enter the pantry, your heart freezes. It's a child...No, it's Annah. She's whimping. You look at her eyes. She knows what you did. She has seen your face. A cold feeling crosses your body. You...you can't leave it like this. But...\n\nThere's nowhere no go. There's no scape.\n\nYou have to do it." };
 	Habitacion* despensa = new Habitacion("pantry ", texto);
 	texto = { "The landing. There's a blue door and a red door. To the west, another room." };
 	Habitacion* rellano = new Habitacion("landing", texto);
-	texto = { "The study. Seems like someone has spend a lot of time in here lately. Maybe it's a workingplace? There are a lot of sketches everywhere. Whatever result the artist wants, he isn't getting it." };
+	texto = { "The study. Seems like someone has spend a lot of time in here lately. Maybe it's a workingplace? There are a lot of drafts everywhere. Whatever the writter is trying to accomplish, he isn't inspired enough. Or maybe he's working with a lot of pressure." };
 	Habitacion* estudio = new Habitacion("study", texto);
-	texto = { "The linen mist. The omnipresent presence." };
+	texto = { "The linen mist. The omnipresent presence surrounds you until you don't know where you're going. Whatever it takes you, you don't feel it will be far away." };
 	Habitacion* niebla = new Habitacion("linen mist", texto, TipoHabitacion::NIEBLA);
 
 	//Conexiones entre habitaciones
@@ -74,40 +74,60 @@ Nivel::Nivel(){
 	niebla->AsignarEnlace(OESTE,frontal,false);
 
 	//Contenedores
-	Objeto* joyero = new Objeto("box", "descr", casaDelArbol, CONTENEDOR);
+	texto = { "A carton box. It has 'jewerly case' written over one of the sides." };
+	Objeto* joyero = new Objeto("box", texto, casaDelArbol, CONTENEDOR);
 	entidades.emplace_back(joyero);
-	Objeto* cajaHerramientas = new Objeto("toolbox", "descr", garage, CONTENEDOR);
+	texto = { "A toolbox. Nothing much to say about it." };
+	Objeto* cajaHerramientas = new Objeto("toolbox", texto, garage, CONTENEDOR);
 	entidades.emplace_back(cajaHerramientas);
-	EntidadCerrable* cajaFuerte = new EntidadCerrable("desk safe", "descr", estudio, CLAVE);
+	texto = { "A desk safe with a code input panel. Seems like it's a four digit number, probably a year." };
+	EntidadCerrable* cajaFuerte = new EntidadCerrable("desk safe", texto, estudio, CLAVE);
 	entidades.emplace_back(cajaFuerte);
 
 	//Objetos.
-	entidades.emplace_back(new Objeto("poison", "descr", jardin, VENENO));
-	entidades.emplace_back(new Objeto("meat", "descr", barbacoa, CARNE));
-	entidades.emplace_back(new Objeto("hairpin", "descr", joyero, LLAVE));
-	entidades.emplace_back(new Objeto("coin", "descr", joyero));
-	entidades.emplace_back(new Objeto("photo", "descr", joyero));
-	entidades.emplace_back(new Objeto("wirecutter", "descr", cajaHerramientas, TENAZAS));
-	entidades.emplace_back(new Objeto("knife","descr", cocina, CUCHILLO));
-	entidades.emplace_back(new Objeto("telephone","descr", recibidor, TELEFONO));
-	entidades.emplace_back(new Objeto("portrait","descr", recibidor));
-	entidades.emplace_back(new Objeto("money","descr", cajaFuerte, DINERO));
+	texto = {"Poison. Rodenticide to be exact. It's almost empty, but It has enough for one use in another object." };
+	entidades.emplace_back(new Objeto("poison", texto, jardin, VENENO));
+	texto = {"Meat. A meatball to be exact. Seems lazily made from other meats leftovers. Maybe an animal reward?" };
+	entidades.emplace_back(new Objeto("meat", texto, barbacoa, CARNE));
+	texto = {"An girly hairpin with a flower motive. A few long, blonde hairs are trapped in it. Seems like a treasured, favorite accesory rather than a regularly used one.\nI could picklock a door with it."};
+	entidades.emplace_back(new Objeto("hairpin", texto, joyero, LLAVE));
+	texto = { "A pound. The treasured piece of foreign currency. God save the queen!" };
+	entidades.emplace_back(new Objeto("coin", texto, joyero));
+	texto = { "A photo of a brunette little girl with a beauty mark. Seems very old. In the reverse there are two messages; written awkwardly with a pen 'Mom when she was as old as me'. Written with a pencil, so old and blurred that is hard to read 'Elizabeth, 1957'." };
+	entidades.emplace_back(new Objeto("photo", texto, joyero));
+	texto = { "A wireccuter. I could use it to...cut...wires. Mom didn't love me for my creativity." };
+	entidades.emplace_back(new Objeto("wirecutter", texto, cajaHerramientas, TENAZAS));
+	texto = { "A japanese knife. Perfect for slicing, rather than chop, but it could do the trick. I could use it as a weapon for stabbing." };
+	entidades.emplace_back(new Objeto("knife", texto, cocina, CUCHILLO));
+	texto = { "A telephone. The line wire is connected to it." };
+	entidades.emplace_back(new Objeto("telephone", texto, recibidor, TELEFONO));
+	texto = { "A portrait of a woman with a beauty mark. She's holding a newborn baby with such a lovely face. There's a date: 1981." };
+	entidades.emplace_back(new Objeto("portrait", texto, recibidor));
+	texto = { "Money. The reason I'm here, it seems. Let's just take it and leave this place." };
+	entidades.emplace_back(new Objeto("money", texto, cajaFuerte, DINERO));
 
 	//NPC
-	NPC* perro = new NPC("dog", "descr", trasera, "mensjdd");
+	texto = { "A dog. Seems like a mix of the imposing sturdiness of a boxer and the stupid friendliness of a golden retriever. More bark than bite. " };
+	NPC* perro = new NPC("dog", texto, trasera, " A moment later, the dog begins to choke, and the poor creature falls to the ground.");
 	vector<OrientacionSalida>* guardian = perro->get_guardia();
 	guardian->push_back(OESTE);
 	entidades.emplace_back(perro);
 
-	entidades.emplace_back(new NPC("girl", "descr", despensa, "You did it", FINALE));
+	entidades.emplace_back(new NPC("annah", "A panicked Annah...", despensa, "You did it", FINALE));
 
 	//Puertas.
-	entidades.emplace_back(new Puerta("front door", "descr", frontal));
-	entidades.emplace_back(new Puerta("back door", "descr", trasera, garage, CANDADO));
-	entidades.emplace_back(new Puerta("pantry door", "descr", recibidor, despensa, CANDADO));
-	entidades.emplace_back(new Puerta("pantry exit", "descr", despensa, recibidor));
-	entidades.emplace_back(new Puerta("blue door", "descr", rellano));
-	entidades.emplace_back(new Puerta("red door", "descr", rellano));
+	texto = { "The main door. Strongly secured." };
+	entidades.emplace_back(new Puerta("front door", texto, frontal));
+	texto = { "The back door. Seems somewhat more easy to force open." };
+	entidades.emplace_back(new Puerta("back door", texto, trasera, garage, CANDADO));
+	texto = { "The panty door. Secured so the little boys don't find the cookie jar." };
+	entidades.emplace_back(new Puerta("pantry door", texto, recibidor, despensa, CANDADO));
+	texto = { "There's no scape." };
+	entidades.emplace_back(new Puerta("pantry exit", texto, despensa, recibidor));
+	texto = { "A blue door. Simple, without decoration." };
+	entidades.emplace_back(new Puerta("blue door", texto, rellano));
+	texto = { "A red door. 'Annah' is written with letters cut from a magazine. Reading that name give you goosebumps." };
+	entidades.emplace_back(new Puerta("red door", texto, rellano));
 
 	//Puntero que indica dónde está el personaje
 	visitando = niebla;
@@ -125,6 +145,9 @@ Nivel::Nivel(){
 	entidades.emplace_back(rellano);
 	entidades.emplace_back(estudio);
 	entidades.emplace_back(niebla);
+
+	//Mensaje de introducción
+	cout << "\n\n'Annah...'\n\nYou wake up as that name echoes through your mind, like the dying scream of a forgotten memory.You eyes are now open, but it doesn't make any difference; a thick linen colored mist covers everything around you.\n\nYour foggy memory seems to relate.You don't remember anything. Who are you? What is this place? How did you get here? The sweat in your forehead is the sole testimony of your past actions.The adrenalyn running through your body, the accelerated pulse...and the panic your face is reflecting.Where you running from something ? From someone ?\n\nThe linen mist seems more and more unsettingly familiar as you try to remember.Something deep inside you doesn't trust it, urging you to leave.";
 
 }
 
@@ -219,8 +242,8 @@ void Nivel::operacion(const vector<string> operacion) {
 				break;
 
 			case 1:
-				if (operacion.at(0).compare("LOOK") == 0){
-					cout << "I see";
+				if (operacion.at(0).compare("inventory") == 0){
+					nombrarObjetosContenidos(NULL);
 				}
 				else {cout << "You can't do that";}
 				break;
@@ -437,10 +460,12 @@ void Nivel::go(const string destinoDeseado){
 		if (visitar != NULL){
 
 			//Si no ha sido visitado nunca antes (fase 0), se
-			//da la descripción larga y se pasa a fase 1.
+			//da la descripción larga, los objetos contenidos
+			//y se pasa a fase 1.
 			if( visitar->get_fase() == 0 ){
 				visitar->set_fase(1);
 				cout << visitar->get_descripcion();
+				nombrarObjetosContenidos(visitar);
 			} else { //Si no, simplemente se dice que se ha regresado.
 				cout << "You return to the " << visitar->get_nombre() << ".";
 			}
@@ -509,9 +534,10 @@ void Nivel::open(const string objetoDeseado)
 	//Se busca el objeto deseado
 	Entidad* entidad = buscarEntidad(objetoDeseado);
 
-	//SALE - Si la entidad no es un cerrable o puerta
-	if (entidad->get_tipoEntidad() != CERRABLE &&
-		entidad->get_tipoEntidad() != PUERTA) {
+	//SALE - Si la entidad no existe o no es un cerrable o puerta
+	if (entidad == NULL || (
+		entidad->get_tipoEntidad() != CERRABLE &&
+		entidad->get_tipoEntidad() != PUERTA)) {
 		cout << "You can't do that.";
 		return;
 	}
@@ -631,7 +657,7 @@ void Nivel::unlock(const string objetoDeseado)
 		cout << "Enter code: ";
 		getline(cin, comando);
 
-		if (comando.compare("1950") == 0) {
+		if (comando.compare("1951") == 0) {
 			cout << "\n\nCorrect code. Unlocked.";
 			cerrable->set_bloqueado(false);
 		}
@@ -837,6 +863,7 @@ void Nivel::kill(Entidad * entidad)
 		if (victima->get_vida() > 0) {
 			victima->set_vida(0);
 			cout << victima->get_mensajeMuerte();
+			victima->set_descripcion(victima->get_descripcion() + " It is dead.");
 
 			//NARRATIVA - Acaba el quicktime event
 			tiempo = NULL;
@@ -935,7 +962,11 @@ void Nivel::nombrarObjetosContenidos(const Entidad * entidad)
 	//a la función como parametro asignadas como padre
 	for (int i = 0; i < entidades.size(); i++) {
 		if (entidades.at(i).get()->get_padre() == entidad) {
-			contiene.push_back(entidades.at(i).get()->get_nombre());
+			//Si la entidad parametro es NULL se quiere devolver el inventario,
+			//por lo que se asegura también de que sean objetos
+			if (entidad != NULL || entidades.at(i).get()->get_tipoEntidad() == ITEM) {
+				contiene.push_back(entidades.at(i).get()->get_nombre());
+			}
 		}
 	}
 

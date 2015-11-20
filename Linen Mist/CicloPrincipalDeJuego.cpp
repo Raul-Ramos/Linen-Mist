@@ -9,7 +9,7 @@ using namespace std;
 
 void CicloDeJuego::iniciar()
 {
-	cout << "Welcome to the Linen Mist";
+	cout << "_____________________________________________________\n  Linen Mist- Raul Ramos Macias - @MetroGoldyMayer  \n_____________________________________________________" ;
 
 	//Genera el mundo
 	Nivel* nivel = new Nivel();
