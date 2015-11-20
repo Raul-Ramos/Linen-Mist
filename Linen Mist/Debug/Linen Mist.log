@@ -1,0 +1,34 @@
+﻿Build started 20/11/2015 15:44:57.
+     1>Project "C:\Users\Usuario\Documents\Visual Studio 2008\Projects\Linen-Mist\Linen Mist\Linen Mist.vcxproj" on node 2 (Build target(s)).
+     1>ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _CONSOLE /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Yu"stdafx.h" /Fp"Debug\Linen Mist.pch" /Fo"Debug\\" /Fd"Debug\vc140.pdb" /Gd /TP /analyze- /errorReport:prompt Nivel.cpp
+         Nivel.cpp
+     1>c:\users\usuario\documents\visual studio 2008\projects\linen-mist\linen mist\nivel.cpp(266): warning C4018: '<': signed/unsigned mismatch
+     1>c:\users\usuario\documents\visual studio 2008\projects\linen-mist\linen mist\nivel.cpp(413): warning C4018: '<': signed/unsigned mismatch
+     1>c:\users\usuario\documents\visual studio 2008\projects\linen-mist\linen mist\nivel.cpp(445): warning C4018: '<': signed/unsigned mismatch
+     1>c:\users\usuario\documents\visual studio 2008\projects\linen-mist\linen mist\nivel.cpp(629): warning C4018: '<': signed/unsigned mismatch
+     1>c:\users\usuario\documents\visual studio 2008\projects\linen-mist\linen mist\nivel.cpp(679): warning C4018: '<': signed/unsigned mismatch
+     1>c:\users\usuario\documents\visual studio 2008\projects\linen-mist\linen mist\nivel.cpp(793): warning C4018: '<': signed/unsigned mismatch
+     1>c:\users\usuario\documents\visual studio 2008\projects\linen-mist\linen mist\nivel.cpp(812): warning C4018: '<': signed/unsigned mismatch
+     1>c:\users\usuario\documents\visual studio 2008\projects\linen-mist\linen mist\nivel.cpp(810): warning C4101: 'indice': unreferenced local variable
+     1>c:\users\usuario\documents\visual studio 2008\projects\linen-mist\linen mist\nivel.cpp(963): warning C4018: '<': signed/unsigned mismatch
+     1>c:\users\usuario\documents\visual studio 2008\projects\linen-mist\linen mist\nivel.cpp(980): warning C4018: '<': signed/unsigned mismatch
+     1>c:\users\usuario\documents\visual studio 2008\projects\linen-mist\linen mist\nivel.cpp(1050): warning C4996: '_sleep': This function or variable has been superceded by newer library or operating system functionality. Consider using Sleep instead. See online help for details.
+         c:\program files (x86)\windows kits\10\include\10.0.10150.0\ucrt\stdlib.h(1266): note: see declaration of '_sleep'
+       Link:
+         C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\Usuario\Documents\Visual Studio 2008\Projects\Linen-Mist\Debug\Linen Mist.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /Debug /PDB:"C:\Users\Usuario\Documents\Visual Studio 2008\Projects\Linen-Mist\Debug\Linen Mist.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\Usuario\Documents\Visual Studio 2008\Projects\Linen-Mist\Debug\Linen Mist.lib" /MACHINE:X86 /SAFESEH Debug\CicloPrincipalDeJuego.obj
+         Debug\Entidad.obj
+         Debug\EntidadCerrable.obj
+         Debug\Habitacion.obj
+         "Debug\Linen Mist.obj"
+         Debug\Nivel.obj
+         Debug\NPC.obj
+         Debug\Objeto.obj
+         Debug\Puerta.obj
+         Debug\stdafx.obj
+         Linen Mist.vcxproj -> C:\Users\Usuario\Documents\Visual Studio 2008\Projects\Linen-Mist\Debug\Linen Mist.exe
+     1>Done Building Project "C:\Users\Usuario\Documents\Visual Studio 2008\Projects\Linen-Mist\Linen Mist\Linen Mist.vcxproj" (Build target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:03.28

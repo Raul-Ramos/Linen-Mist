@@ -1,11 +1,19 @@
-#include <string>
+#ifndef __CicloPrincipalDeJuego__
+#define __CicloPrincipalDeJuego__
+
+#include "string"
+#include "vector"
+#include "iostream"
+#include "sstream"
+#include <algorithm>
 
 using namespace std;
 
 class CicloDeJuego {
-    int width, height; //TODO: BORRAR
   public:
 	void iniciar();
   private:
-	void separarPalabras(string);
+	vector<string> separarPalabras(const string &, vector<string> &);
 };
+
+#endif //__CicloPrincipalDeJuego__
